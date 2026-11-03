@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MTB COACHING / DYLAN</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Jim+Nightshade&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stage-wrap" id="stageWrap">
+  <div class="stage" id="stage">
+
+  <!-- PAGE 7: MTB COACHING / GET IN TOUCH -->
+  <div class="page-container page-coaching" id="coaching">
+    <div class="brand-title" onclick="window.location.href='index.html#home'">D Y L A N &nbsp; / &nbsp; PORTFOLIO</div>
+    <nav class="nav-links">
+      <a href="index.html#home" class="nav-link">HOME</a>
+      <a href="index.html#about" class="nav-link">ABOUT</a>
+      <a href="index.html#work" class="nav-link">WORK</a>
+      <a href="index.html#football" class="nav-link">FOOTBALL</a>
+      <a href="index.html#mtb" class="nav-link active">MTB</a>
+      <a href="index.html#photography" class="nav-link">PHOTOGRAPHY</a>
+    </nav>
+    <div class="top-divider top-divider-dark"></div>
+
+    <div class="coach-tag">MTB COACHING / 1:1 SESSIONS</div>
+    <h2 class="coach-title">RIDE WITH<br>CONFIDENCE.</h2>
+    <div class="coach-subtitle">FOR FIRST-TIMERS, RETURNERS, AND RIDERS WHO WANT TO LEVEL UP.</div>
+
+    <p class="coach-intro">
+      I help riders of all levels build real confidence on the trail. Whether you’re getting on a mountain bike for the first time or looking to level up, I can teach you:
+    </p>
+
+    <div class="coach-list-label">WHAT I CAN TEACH YOU</div>
+    <ul class="coach-skills">
+      <li><span class="num">01</span>Body position and balance</li>
+      <li><span class="num">02</span>Braking and speed control</li>
+      <li><span class="num">03</span>Cornering</li>
+      <li><span class="num">04</span>Climbing and descending</li>
+      <li><span class="num">05</span>Lifting the front and rear wheel</li>
+      <li><span class="num">06</span>Jumping and riding drops</li>
+      <li><span class="num">07</span>Basic bike maintenance</li>
+    </ul>
+
+    <div class="coach-note">
+      <div class="coach-note-bar"></div>
+      <div class="coach-note-title">CONFIDENCE IS BUILT ONE SKILL AT A TIME.</div>
+      <div class="coach-note-sub">Sessions are adapted to your level, your bike, and the terrain you want to ride.</div>
+    </div>
+
+    <div class="coach-meta">1–2 SESSIONS / WEEK &nbsp;·&nbsp; 60–90 MIN &nbsp;·&nbsp; BRING BIKE, HELMET, WATER</div>
+    <div class="coach-meta coach-meta-red">TO BOOK: USE GET IN TOUCH ON THE MTB PAGE</div>
+
+    <img src="assets/coach-hero.jpg" alt="MTB coaching on the trail" class="coach-img-main" />
+    <img src="assets/coach-bike.jpg" alt="Bike setup and maintenance" class="coach-img-small1" />
+    <img src="assets/coach-corner.jpg" alt="Cornering practice" class="coach-img-small2" />
+    <div class="coach-img-caption">1:1 COACHING &nbsp;/&nbsp; ON THE TRAIL &nbsp;/&nbsp; ALL LEVELS</div>
+
+    <div class="bottom-divider"></div>
+
+    <div class="copyright">
+      © 2025 DYLAN &nbsp;/&nbsp; SPORT · OUTDOORS · PHOTOGRAPHY
+    </div>
+    <a href="index.html#mtb" class="contact-link">
+      BACK TO MTB <span class="arrow">↑</span>
+    </a>
+  </div>
+
+
+  </div><!-- /.stage -->
+</div><!-- /.stage-wrap -->
+
+  <script>
+    // Scale the 1440-wide design to the window width on this standalone page.
+    (function () {
+      const stage = document.getElementById('stage');
+      const wrap = document.getElementById('stageWrap');
+      const DESIGN_W = 1440;
+      const DESIGN_H = 900;
+
+      function fitStage() {
+        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        const scale = viewportWidth / DESIGN_W;
+
+        if ('zoom' in stage.style) {
+          stage.style.zoom = scale;
+          stage.style.transform = '';
+          wrap.style.height = '';
+        } else {
+          stage.style.zoom = '';
+          stage.style.transform = 'scale(' + scale + ')';
+          wrap.style.height = (DESIGN_H * scale) + 'px';
+        }
+      }
+
+      fitStage();
+      window.addEventListener('resize', fitStage);
+      window.addEventListener('orientationchange', fitStage);
+    })();
+  </script>
+</body>
+</html>

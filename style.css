@@ -6,13 +6,14 @@
 }
 
 html {
-  scroll-behavior: smooth;
-  background-color: #0d0d0d;
+  height: 100%;
+  background-color: #171717;
 }
 
 body {
   width: 100%;
-  background-color: #0d0d0d;
+  min-height: 100vh;
+  background-color: #171717;
   color: #B8B4AE;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -20,9 +21,28 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  overflow-x: hidden;
 }
 
-/* Master Fixed Page Frame: Exactly 1440px * 900px */
+/* Scroll wrapper: its height is set in JS to the scaled canvas height */
+.stage-wrap {
+  position: relative;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+/* Responsive stage: the 1440 x 900 canvas is scaled to the window width.
+   The height is free, so the document scrolls vertically when needed. */
+.stage {
+  position: relative;
+  width: 1440px;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* Master page frame: Exactly 1440px * 900px.
+   All pages are stacked vertically to form one continuous scroll page. */
 .page-container {
   width: 1440px;
   height: 900px;
@@ -30,14 +50,6 @@ body {
   background-color: #171717;
   overflow: hidden;
   margin: 0 auto;
-  display: none;
-  opacity: 0;
-  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.page-container.active {
-  display: block;
-  opacity: 1;
 }
 
 .card-clickable {
@@ -165,12 +177,10 @@ body {
 =================================================== */
 .page-home .hero-img-box {
   position: absolute;
-  left: 603px;
-  top: 100px;
-  width: 745px;
-  height: 696px;
-  border-radius: 8px;
-  overflow: hidden;
+  left: 637px;
+  top: 109px;
+  width: 691px;
+  height: 687px;
   z-index: 1;
   pointer-events: none;
 }
@@ -178,9 +188,8 @@ body {
 .page-home .hero-img-box img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
-  border-radius: 8px;
   display: block;
 }
 
@@ -1047,4 +1056,1009 @@ body {
   line-height: 1.5;
   word-wrap: break-word;
   z-index: 2;
+}
+
+/* ===================================================
+   PAGE 5 ADD-ON: MTB COACHING CTA (inside the card)
+=================================================== */
+.page-mtb .mtb-coaching {
+  position: absolute;
+  left: 962px;
+  top: 750px;
+  width: 370px;
+  padding-top: 14px;
+  border-top: 1px solid #393939;
+  z-index: 3;
+}
+
+.page-mtb .mtb-coaching-label {
+  color: #B8B4AE;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.page-mtb .mtb-coaching-link {
+  display: inline-block;
+  margin-top: 7px;
+  color: #E53935;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.page-mtb .mtb-coaching-link:hover {
+  color: #FFFFFF;
+}
+
+.page-mtb .mtb-coaching-link .arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.page-mtb .mtb-coaching-link:hover .arrow {
+  transform: translate(2px, -2px);
+}
+
+/* ===================================================
+   PAGE 7: MTB COACHING / GET IN TOUCH
+=================================================== */
+.page-coaching .coach-tag {
+  position: absolute;
+  left: 64px;
+  top: 108px;
+  width: 520px;
+  color: #B8B4AE;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  z-index: 2;
+}
+
+.page-coaching .coach-title {
+  position: absolute;
+  left: 64px;
+  top: 128px;
+  width: 730px;
+  color: #E53935;
+  font-size: 70px;
+  font-family: 'Jim Nightshade', cursive;
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: 0.02em;
+  user-select: none;
+  z-index: 2;
+}
+
+.page-coaching .coach-subtitle {
+  position: absolute;
+  left: 66px;
+  top: 288px;
+  width: 680px;
+  color: #F4F1EC;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  z-index: 2;
+}
+
+.page-coaching .coach-intro {
+  position: absolute;
+  left: 66px;
+  top: 324px;
+  width: 650px;
+  color: #F4F1EC;
+  font-size: 16.5px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  word-wrap: break-word;
+  z-index: 2;
+}
+
+.page-coaching .coach-list-label {
+  position: absolute;
+  left: 64px;
+  top: 432px;
+  width: 500px;
+  color: #B8B4AE;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  z-index: 2;
+}
+
+.page-coaching .coach-skills {
+  position: absolute;
+  left: 64px;
+  top: 466px;
+  width: 690px;
+  column-count: 2;
+  column-gap: 44px;
+  list-style: none;
+  z-index: 2;
+}
+
+.page-coaching .coach-skills li {
+  break-inside: avoid;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 12px 0 11px;
+  border-bottom: 1px solid rgba(184, 180, 174, 0.14);
+  color: #F4F1EC;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+.page-coaching .coach-skills .num {
+  flex: 0 0 auto;
+  color: #E53935;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.page-coaching .coach-note {
+  position: absolute;
+  left: 64px;
+  top: 690px;
+  width: 660px;
+  z-index: 2;
+}
+
+.page-coaching .coach-note-bar {
+  width: 80px;
+  height: 4px;
+  background-color: #E53935;
+  margin-bottom: 16px;
+}
+
+.page-coaching .coach-note-title {
+  color: #F4F1EC;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.page-coaching .coach-note-sub {
+  margin-top: 10px;
+  width: 610px;
+  color: #B8B4AE;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.page-coaching .coach-img-main {
+  position: absolute;
+  left: 820px;
+  top: 105px;
+  width: 556px;
+  height: 366px;
+  border-radius: 8px;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.page-coaching .coach-img-small1 {
+  position: absolute;
+  left: 820px;
+  top: 487px;
+  width: 270px;
+  height: 270px;
+  border-radius: 8px;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.page-coaching .coach-img-small2 {
+  position: absolute;
+  left: 1106px;
+  top: 487px;
+  width: 270px;
+  height: 270px;
+  border-radius: 8px;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.page-coaching .coach-img-caption {
+  position: absolute;
+  left: 820px;
+  top: 772px;
+  width: 556px;
+  color: #B8B4AE;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  z-index: 2;
+}
+
+/* ===================================================
+   MOMENTS / PINNED HORIZONTAL SCROLL GALLERY
+   Vertical page scroll drives a horizontal image collage.
+=================================================== */
+.moments-scroll {
+  position: relative;
+  width: 1440px;
+  height: 3000px;
+  background-color: #171717;
+}
+
+.moments-pin {
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 1440px;
+  height: 900px;
+  overflow: hidden;
+  background-color: #171717;
+}
+
+.moments-pin::before {
+  content: "";
+  position: absolute;
+  left: -220px;
+  top: -280px;
+  width: 1100px;
+  height: 1100px;
+  background: radial-gradient(circle, rgba(229, 57, 53, 0.10) 0%, rgba(229, 57, 53, 0) 62%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.moments-track {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3940px;
+  height: 900px;
+  z-index: 1;
+  will-change: transform;
+}
+
+/* Oversized ghost type that drifts at a slower speed */
+.moments-ghost {
+  position: absolute;
+  left: -40px;
+  top: 530px;
+  white-space: nowrap;
+  color: rgba(229, 57, 53, 0.055);
+  font-family: 'Jim Nightshade', cursive;
+  font-size: 220px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  will-change: transform;
+}
+
+/* Intro panel */
+.moments-intro {
+  position: absolute;
+  left: 64px;
+  top: 104px;
+  width: 520px;
+  z-index: 2;
+}
+
+.moments-tag {
+  color: #B8B4AE;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.moments-title {
+  margin-top: 18px;
+  color: #E53935;
+  font-family: 'Jim Nightshade', cursive;
+  font-size: 76px;
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: 0.01em;
+  user-select: none;
+}
+
+.moments-copy {
+  margin-top: 24px;
+  width: 420px;
+  color: #F4F1EC;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+}
+
+.moments-rule {
+  margin-top: 30px;
+  width: 80px;
+  height: 4px;
+  background-color: #E53935;
+}
+
+.moments-scroll-hint {
+  margin-top: 18px;
+  color: #B8B4AE;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.moments-scroll-hint .arrow {
+  display: inline-block;
+  margin-left: 6px;
+}
+
+/* Photo panels */
+.moments-item {
+  position: absolute;
+  margin: 0;
+  z-index: 2;
+}
+
+.moments-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.moments-item figcaption {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 12px);
+  color: #B8B4AE;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+}
+
+.mi-0 { left: 1120px; top: 470px; width: 256px; height: 260px; }
+.mi-1 { left: 660px; top: 270px; width: 380px; height: 340px; }
+.mi-2 { left: 1580px; top: 440px; width: 440px; height: 300px; }
+.mi-3 { left: 2070px; top: 150px; width: 330px; height: 300px; }
+.mi-4 { left: 2460px; top: 470px; width: 300px; height: 320px; }
+.mi-5 { left: 2820px; top: 190px; width: 330px; height: 300px; }
+.mi-6 { left: 3210px; top: 360px; width: 320px; height: 400px; }
+
+/* Typographic interludes */
+.moments-quote {
+  position: absolute;
+  left: 1130px;
+  top: 208px;
+  width: 390px;
+  z-index: 2;
+}
+
+.moments-quote-sm {
+  color: #F4F1EC;
+  font-family: 'Jim Nightshade', cursive;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+
+.moments-quote-lg {
+  margin-top: 8px;
+  color: #E53935;
+  font-family: 'Jim Nightshade', cursive;
+  font-size: 38px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+}
+
+.moments-quote-rule {
+  margin-top: 26px;
+  width: 64px;
+  height: 3px;
+  background-color: #E53935;
+}
+
+/* Closing panel */
+.moments-end {
+  position: absolute;
+  left: 3600px;
+  top: 236px;
+  width: 300px;
+  z-index: 2;
+}
+
+.moments-end-rule {
+  width: 80px;
+  height: 4px;
+  background-color: #E53935;
+}
+
+.moments-end-title {
+  margin-top: 22px;
+  color: #E53935;
+  font-family: 'Jim Nightshade', cursive;
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 1.16;
+  letter-spacing: 0.02em;
+}
+
+.moments-end-sub {
+  margin-top: 26px;
+  color: #B8B4AE;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+
+
+/* Top scroll progress line (overlays the divider) */
+.moments-progress {
+  position: absolute;
+  left: 64px;
+  top: 70px;
+  width: 1312px;
+  height: 2px;
+  z-index: 11;
+  pointer-events: none;
+}
+
+.moments-progress span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: #E53935;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* ===================================================
+   FINAL PAGE / FOOTER
+   A cream header + closing statement + rider + ticker
+=================================================== */
+.page-end {
+  background-color: #171717;
+}
+
+.page-end .brand-title {
+  color: #171717;
+  z-index: 12;
+}
+
+.page-end .nav-links {
+  z-index: 12;
+}
+
+.page-end .nav-link {
+  color: #2F2F2F;
+}
+
+.page-end .nav-link:hover {
+  color: #E53935;
+}
+
+.page-end .nav-link.active {
+  color: #171717;
+}
+
+.end-band {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1440px;
+  height: 120px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.end-eyebrow {
+  position: absolute;
+  left: 0;
+  top: 134px;
+  width: 1440px;
+  text-align: center;
+  color: #B8B4AE;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.20em;
+  z-index: 4;
+}
+
+.end-title {
+  position: absolute;
+  left: 0;
+  top: 156px;
+  width: 1440px;
+  text-align: center;
+  font-weight: 400;
+  line-height: 0.96;
+  z-index: 4;
+  user-select: none;
+}
+
+.end-title-line {
+  display: block;
+  white-space: nowrap;
+}
+
+.end-sans {
+  font-family: 'Inter', sans-serif;
+  font-size: 58px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #F4F1EC;
+}
+
+.end-serif {
+  font-family: 'Jim Nightshade', cursive;
+  font-size: 72px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: #F4F1EC;
+}
+
+.end-serif.end-red {
+  color: #E53935;
+}
+
+.end-glow {
+  position: absolute;
+  left: 200px;
+  top: 130px;
+  width: 1040px;
+  height: 760px;
+  background: radial-gradient(circle at 50% 48%, rgba(229, 57, 53, 0.13) 0%, rgba(229, 57, 53, 0) 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.end-rider {
+  position: absolute;
+  left: 570px;
+  top: 305px;
+  width: 300px;
+  height: 475px;
+  object-fit: contain;
+  filter: drop-shadow(0 28px 40px rgba(0, 0, 0, 0.5));
+  z-index: 2;
+}
+
+/* Footer link columns */
+.end-col {
+  position: absolute;
+  top: 352px;
+  width: 250px;
+  z-index: 4;
+}
+
+.end-col-left {
+  left: 64px;
+}
+
+.end-col-right {
+  left: 1126px;
+  text-align: right;
+}
+
+.end-col-label {
+  margin-bottom: 16px;
+  color: #B8B4AE;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.20em;
+}
+
+.end-col a {
+  display: block;
+  color: #F4F1EC;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 30px;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.end-col a:hover {
+  color: #E53935;
+}
+
+.end-col-right a.end-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 13px 18px;
+  background-color: #E53935;
+  color: #F4F1EC;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.end-col-right a.end-cta:hover {
+  background-color: #F4F1EC;
+  color: #E53935;
+}
+
+.end-col-right a.end-cta .arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.end-col-right a.end-cta:hover .arrow {
+  transform: translate(2px, -2px);
+}
+
+.end-col-note {
+  margin-top: 12px;
+  color: #7E7A74;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+}
+
+/* Scrolling text ribbon */
+.end-marquee {
+  position: absolute;
+  left: 0;
+  top: 800px;
+  width: 1440px;
+  height: 70px;
+  overflow: hidden;
+  background-color: #F4F1EC;
+  z-index: 6;
+}
+
+.end-marquee-track {
+  display: flex;
+  width: max-content;
+  height: 70px;
+  align-items: center;
+  animation: endMarquee 34s linear infinite;
+  will-change: transform;
+}
+
+.end-marquee:hover .end-marquee-track {
+  animation-play-state: paused;
+}
+
+.end-marquee-group {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  height: 70px;
+}
+
+.end-marquee-word {
+  padding: 0 22px;
+  color: #171717;
+  font-family: 'Inter', sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 70px;
+  white-space: nowrap;
+}
+
+.end-marquee-sep {
+  color: #E53935;
+  font-size: 14px;
+  line-height: 70px;
+}
+
+@keyframes endMarquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Bottom meta line */
+.end-bottom {
+  position: absolute;
+  left: 0;
+  top: 870px;
+  width: 1440px;
+  height: 30px;
+  z-index: 7;
+}
+
+.end-copy {
+  position: absolute;
+  left: 64px;
+  top: 12px;
+  color: #B8B4AE;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.end-top-link {
+  position: absolute;
+  left: 1064px;
+  top: 12px;
+  width: 312px;
+  text-align: right;
+  color: #B8B4AE;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.end-top-link:hover {
+  color: #F4F1EC;
+}
+
+.end-top-link .arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.end-top-link:hover .arrow {
+  transform: translate(0, -2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .end-marquee-track {
+    animation: none;
+  }
+}
+
+/* ===================================================
+   FOOTBALL HELP CTA / PHOTOGRAPHY HELP CTA
+=================================================== */
+.page-football .football-card-bg {
+  height: 580px;
+}
+
+.page-football .football-card-stripe {
+  height: 580px;
+}
+
+.page-football .football-help {
+  position: absolute;
+  left: 962px;
+  top: 748px;
+  width: 370px;
+  padding-top: 14px;
+  border-top: 1px solid #393939;
+  z-index: 3;
+}
+
+.page-football .football-help-label {
+  color: #B8B4AE;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.page-football .football-help-link {
+  display: inline-block;
+  margin-top: 7px;
+  color: #E53935;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.page-football .football-help-link:hover {
+  color: #FFFFFF;
+}
+
+.page-football .football-help-link .arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.page-football .football-help-link:hover .arrow {
+  transform: translate(2px, -2px);
+}
+
+.page-photography .photo-desc {
+  width: 780px;
+  font-size: 14px;
+}
+
+.page-photography .photo-help {
+  position: absolute;
+  left: 880px;
+  top: 782px;
+  width: 496px;
+  padding-top: 12px;
+  border-top: 1px solid #393939;
+  z-index: 3;
+}
+
+.page-photography .photo-help-label {
+  color: #B8B4AE;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.page-photography .photo-help-link {
+  display: inline-block;
+  margin-top: 6px;
+  color: #E53935;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.page-photography .photo-help-link:hover {
+  color: #FFFFFF;
+}
+
+.page-photography .photo-help-link .arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.page-photography .photo-help-link:hover .arrow {
+  transform: translate(2px, -2px);
+}
+
+/* ===================================================
+   SHARED HELP DETAIL PAGES (football-help / photography-help)
+=================================================== */
+.page-help .help-tag {
+  position: absolute;
+  left: 64px;
+  top: 108px;
+  width: 560px;
+  color: #B8B4AE;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  z-index: 2;
+}
+
+.page-help .help-title {
+  position: absolute;
+  left: 64px;
+  top: 128px;
+  width: 730px;
+  color: #E53935;
+  font-size: 70px;
+  font-family: 'Jim Nightshade', cursive;
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: 0.02em;
+  user-select: none;
+  z-index: 2;
+}
+
+.page-help .help-subtitle {
+  position: absolute;
+  left: 66px;
+  top: 292px;
+  width: 680px;
+  color: #F4F1EC;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  z-index: 2;
+}
+
+.page-help .help-intro {
+  position: absolute;
+  left: 66px;
+  top: 328px;
+  width: 650px;
+  color: #F4F1EC;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  word-wrap: break-word;
+  z-index: 2;
+}
+
+.page-help .help-details {
+  position: absolute;
+  left: 64px;
+  top: 424px;
+  width: 670px;
+  z-index: 2;
+}
+
+.page-help .help-field {
+  margin-bottom: 9px;
+}
+
+.page-help .help-label {
+  margin-bottom: 3px;
+  color: #B8B4AE;
+  font-size: 9.2px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.page-help .help-text {
+  color: #F4F1EC;
+  font-size: 13.5px;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  word-wrap: break-word;
+}
+
+.page-help .help-img-main {
+  position: absolute;
+  left: 820px;
+  top: 105px;
+  width: 556px;
+  height: 366px;
+  border-radius: 8px;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.page-help .help-img-small1 {
+  position: absolute;
+  left: 820px;
+  top: 487px;
+  width: 270px;
+  height: 270px;
+  border-radius: 8px;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.page-help .help-img-small2 {
+  position: absolute;
+  left: 1106px;
+  top: 487px;
+  width: 270px;
+  height: 270px;
+  border-radius: 8px;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.page-help .help-img-caption {
+  position: absolute;
+  left: 820px;
+  top: 772px;
+  width: 556px;
+  color: #B8B4AE;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  z-index: 2;
+}
+
+/* MTB coaching page: quick session notes */
+.page-coaching .coach-meta {
+  position: absolute;
+  left: 64px;
+  top: 780px;
+  width: 660px;
+  color: #B8B4AE;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  z-index: 2;
+}
+
+.page-coaching .coach-meta-red {
+  top: 798px;
+  color: #E53935;
 }

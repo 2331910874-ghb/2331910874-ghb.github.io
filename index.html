@@ -10,9 +10,29 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Jim+Nightshade&display=swap" rel="stylesheet">
   
+  <script>
+    // Prevent the browser's own scroll restoration from fighting with
+    // the hash-based section navigation.
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+    // A reload should always show the real homepage, not the section that
+    // happened to be in the URL hash. The hash is cleared before the browser
+    // can perform its own fragment jump.
+    (function () {
+      var entries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+      var navType = entries && entries[0] ? entries[0].type : 'navigate';
+      window.__reloadToHome = navType === 'reload';
+      if (window.__reloadToHome && window.location.hash) {
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    })();
+  </script>
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="stage-wrap" id="stageWrap">
+<div class="stage" id="stage">
   <!-- PAGE 1: HERO / HOME SECTION (1440px * 900px) -->
   <div class="page-container page-home active" id="home">
     <div class="brand-title" onclick="switchPage('home')">D Y L A N &nbsp; / &nbsp; PORTFOLIO</div>
@@ -27,11 +47,7 @@
     <div class="top-divider top-divider-red"></div>
 
     <div class="hero-img-box">
-      <img 
-        style="width: 100%; height: 100%; border-radius: 8px" 
-        src="assets/hero-mtb-transparent.png" 
-        alt="Dylan riding mountain bike" 
-      />
+      <img src="assets/hero-mtb-cutout.png" alt="Dylan riding mountain bike" />
     </div>
 
     <div class="role-subheading">ATHLETE &nbsp;/&nbsp; OUTDOOR EXPLORER &nbsp;/&nbsp; PHOTOGRAPHER</div>
@@ -55,7 +71,7 @@
     <div class="copyright">
       © 2025 DYLAN &nbsp;/&nbsp; SPORT · OUTDOORS · PHOTOGRAPHY
     </div>
-    <a href="#contact" class="contact-link">
+    <a href="coaching.html" class="contact-link">
       CONTACT &nbsp;/&nbsp; GET IN TOUCH <span class="arrow">↗</span>
     </a>
   </div>
@@ -106,7 +122,7 @@
     <div class="copyright">
       © 2025 DYLAN &nbsp;/&nbsp; SPORT · OUTDOORS · PHOTOGRAPHY
     </div>
-    <a href="#contact" class="contact-link">
+    <a href="coaching.html" class="contact-link">
       CONTACT &nbsp;/&nbsp; GET IN TOUCH <span class="arrow">↗</span>
     </a>
   </div>
@@ -150,10 +166,88 @@
     <div class="copyright">
       © 2025 DYLAN &nbsp;/&nbsp; SPORT · OUTDOORS · PHOTOGRAPHY
     </div>
-    <a href="#contact" class="contact-link">
+    <a href="coaching.html" class="contact-link">
       CONTACT &nbsp;/&nbsp; GET IN TOUCH <span class="arrow">↗</span>
     </a>
   </div>
+
+
+  <!-- MOMENTS: PINNED HORIZONTAL SCROLL GALLERY -->
+  <section class="moments-scroll" id="moments">
+    <div class="moments-pin" id="momentsPin">
+      <div class="brand-title" onclick="switchPage('home')">D Y L A N &nbsp; / &nbsp; PORTFOLIO</div>
+      <nav class="nav-links">
+        <a href="#home" class="nav-link" onclick="switchPage('home', event)">HOME</a>
+        <a href="#about" class="nav-link" onclick="switchPage('about', event)">ABOUT</a>
+        <a href="#work" class="nav-link" onclick="switchPage('work', event)">WORK</a>
+        <a href="#football" class="nav-link" onclick="switchPage('football', event)">FOOTBALL</a>
+        <a href="#mtb" class="nav-link" onclick="switchPage('mtb', event)">MTB</a>
+        <a href="#photography" class="nav-link" onclick="switchPage('photography', event)">PHOTOGRAPHY</a>
+      </nav>
+      <div class="top-divider top-divider-dark"></div>
+      <div class="moments-progress"><span id="momentsFill"></span></div>
+
+      <div class="moments-track" id="momentsTrack">
+        <div class="moments-ghost" id="momentsGhost">MADE TO MOVE &nbsp;·&nbsp; BUILT TO NOTICE &nbsp;·&nbsp; MADE TO MOVE &nbsp;·&nbsp; BUILT TO NOTICE</div>
+
+        <div class="moments-intro">
+          <div class="moments-tag">MOMENTS / BETWEEN THE LINES</div>
+          <h2 class="moments-title">KEEP<br>LOOKING.</h2>
+          <p class="moments-copy">The rides, games, and places I don’t want to forget — collected frame by frame.</p>
+          <div class="moments-rule"></div>
+          <div class="moments-scroll-hint">SCROLL TO EXPLORE <span class="arrow">→</span></div>
+        </div>
+
+        <figure class="moments-item mi-0">
+          <figcaption>THE COAST / 2025</figcaption>
+          <img src="assets/moments-coast.jpg" alt="Coastline from a plane" />
+        </figure>
+
+        <figure class="moments-item mi-1">
+          <figcaption>FOOTBALL / PRACTICE</figcaption>
+          <img src="assets/moments-football.jpg" alt="Football practice" />
+        </figure>
+
+        <div class="moments-quote mq-1">
+          <div class="moments-quote-sm">DIFFERENT INTERESTS.</div>
+          <div class="moments-quote-lg">ONE HABIT:<br>KEEP LEARNING.</div>
+          <div class="moments-quote-rule"></div>
+        </div>
+
+        <figure class="moments-item mi-2">
+          <figcaption>THE BIKE / DETAILS</figcaption>
+          <img src="assets/moments-bike.jpg" alt="Mountain bike details" />
+        </figure>
+
+        <figure class="moments-item mi-3">
+          <figcaption>TRAVEL / 2025</figcaption>
+          <img src="assets/moments-pagoda.jpg" alt="Pagoda" />
+        </figure>
+
+        <figure class="moments-item mi-4">
+          <figcaption>SETUP / 2025</figcaption>
+          <img src="assets/moments-detail.jpg" alt="Bike setup detail" />
+        </figure>
+
+        <figure class="moments-item mi-5">
+          <figcaption>CAMP / 2024</figcaption>
+          <img src="assets/moments-camp.jpg" alt="Camping in the mountains" />
+        </figure>
+
+        <figure class="moments-item mi-6">
+          <figcaption>MOUNTAINS / 2024</figcaption>
+          <img src="assets/moments-mountains.jpg" alt="Mountain landscape" />
+        </figure>
+
+        <div class="moments-end">
+          <div class="moments-end-rule"></div>
+          <div class="moments-end-title">MADE TO MOVE.<br>BUILT TO NOTICE.</div>
+          <div class="moments-end-sub">MOMENTS / SELECTED FRAMES</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
 
   <!-- PAGE 4: PROJECT 01 / FOOTBALL (1440px * 900px) -->
   <div class="page-container page-football" id="football">
@@ -192,13 +286,20 @@
     <div class="football-section3-title">WHAT I LEARNED</div>
     <div class="football-section3-desc">Strength also means staying focused and moving forward under pressure.</div>
 
+    <div class="football-help">
+      <div class="football-help-label">FOOTBALL PRACTICE / 1:1 &amp; SMALL GROUP</div>
+      <a href="football-help.html" class="football-help-link">
+        GET IN TOUCH <span class="arrow">↗</span>
+      </a>
+    </div>
+
     <div class="bottom-divider"></div>
 
     <div class="copyright">
       © 2025 DYLAN &nbsp;/&nbsp; SPORT · OUTDOORS · PHOTOGRAPHY
     </div>
-    <a href="#contact" class="contact-link">
-      CONTACT &nbsp;/&nbsp; GET IN TOUCH <span class="arrow">↗</span>
+    <a href="football-help.html" class="contact-link football-contact-link">
+      FOOTBALL PRACTICE &nbsp;/&nbsp; GET IN TOUCH <span class="arrow">↗</span>
     </a>
   </div>
 
@@ -237,6 +338,13 @@
     <div class="mtb-section3-title">WHAT I’M BUILDING</div>
     <div class="mtb-section3-desc">Better judgement, confidence, and persistence — one trail at a time.</div>
 
+    <div class="mtb-coaching">
+      <div class="mtb-coaching-label">MTB COACHING / BUILD REAL CONFIDENCE</div>
+      <a href="coaching.html" class="mtb-coaching-link">
+        GET IN TOUCH <span class="arrow">↗</span>
+      </a>
+    </div>
+
     <div class="mtb-details-label">BIKE DETAILS</div>
     <img src="assets/mtb-detail1.png" alt="Bike detail 1" class="mtb-detail-img1" />
     <img src="assets/mtb-detail2.png" alt="Bike detail 2" class="mtb-detail-img2" />
@@ -247,8 +355,8 @@
     <div class="copyright">
       © 2025 DYLAN &nbsp;/&nbsp; SPORT · OUTDOORS · PHOTOGRAPHY
     </div>
-    <a href="#contact" class="contact-link">
-      CONTACT &nbsp;/&nbsp; GET IN TOUCH <span class="arrow">↗</span>
+    <a href="coaching.html" class="contact-link mtb-contact-link">
+      MTB COACHING &nbsp;/&nbsp; GET IN TOUCH <span class="arrow">↗</span>
     </a>
   </div>
 
@@ -278,53 +386,245 @@
       Photography gives me a different way to explore. While travelling or taking a break from sport, I stop to notice the way light changes a place, how colours work together, and which moments feel worth remembering.
     </div>
 
+    <div class="photo-help">
+      <div class="photo-help-label">PHOTOGRAPHY WALKS / 1:1 FEEDBACK</div>
+      <a href="photography-help.html" class="photo-help-link">
+        GET IN TOUCH <span class="arrow">↗</span>
+      </a>
+    </div>
+
     <div class="bottom-divider"></div>
 
     <div class="copyright">
       © 2025 DYLAN &nbsp;/&nbsp; SPORT · OUTDOORS · PHOTOGRAPHY
     </div>
-    <a href="#contact" class="contact-link">
-      CONTACT &nbsp;/&nbsp; GET IN TOUCH <span class="arrow">↗</span>
+    <a href="photography-help.html" class="contact-link photography-contact-link">
+      PHOTOGRAPHY WALKS &nbsp;/&nbsp; GET IN TOUCH <span class="arrow">↗</span>
     </a>
   </div>
 
-  <!-- Single Page App Router Script -->
-  <script>
-    function switchPage(pageId, event) {
-      if (event) {
-        event.preventDefault();
-      }
-      
-      const pages = document.querySelectorAll('.page-container');
-      pages.forEach(page => {
-        if (page.id === pageId) {
-          page.classList.add('active');
-        } else {
-          page.classList.remove('active');
-        }
-      });
 
-      // Update URL hash without standard jumping
-      history.pushState(null, null, '#' + pageId);
-      window.scrollTo(0, 0);
+
+  <!-- FINAL PAGE: END / FOOTER -->
+  <div class="page-container page-end" id="end">
+    <svg class="end-band" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 0H1440V74C1370 74 1280 82 1160 82H945C905 82 885 116 720 116C555 116 535 82 495 82H280C160 82 70 74 0 74Z" fill="#F4F1EC"/>
+    </svg>
+
+    <div class="brand-title" onclick="switchPage('home')">D Y L A N &nbsp; / &nbsp; PORTFOLIO</div>
+    <nav class="nav-links">
+      <a href="#home" class="nav-link" onclick="switchPage('home', event)">HOME</a>
+      <a href="#about" class="nav-link" onclick="switchPage('about', event)">ABOUT</a>
+      <a href="#work" class="nav-link" onclick="switchPage('work', event)">WORK</a>
+      <a href="#football" class="nav-link" onclick="switchPage('football', event)">FOOTBALL</a>
+      <a href="#mtb" class="nav-link" onclick="switchPage('mtb', event)">MTB</a>
+      <a href="#photography" class="nav-link" onclick="switchPage('photography', event)">PHOTOGRAPHY</a>
+    </nav>
+
+    <div class="end-eyebrow">THE LAST FRAME &nbsp;/&nbsp; 2025</div>
+    <h2 class="end-title">
+      <span class="end-title-line"><span class="end-sans">STILL</span> <span class="end-serif end-red">MOVING.</span></span>
+      <span class="end-title-line"><span class="end-sans">STILL</span> <span class="end-serif">NOTICING.</span></span>
+    </h2>
+
+    <div class="end-glow"></div>
+    <img src="assets/footer-rider.png" alt="Dylan riding his mountain bike" class="end-rider" />
+
+    <div class="end-col end-col-left">
+      <div class="end-col-label">PAGES</div>
+      <a href="#home" onclick="switchPage('home', event)">HOME</a>
+      <a href="#about" onclick="switchPage('about', event)">ABOUT</a>
+      <a href="#work" onclick="switchPage('work', event)">WORK</a>
+      <a href="#football" onclick="switchPage('football', event)">FOOTBALL</a>
+      <a href="#mtb" onclick="switchPage('mtb', event)">MTB</a>
+      <a href="#photography" onclick="switchPage('photography', event)">PHOTOGRAPHY</a>
+    </div>
+
+    <div class="end-col end-col-right">
+      <div class="end-col-label">HOW I CAN HELP</div>
+      <a href="coaching.html">MTB COACHING</a>
+      <a href="football-help.html">FOOTBALL PRACTICE</a>
+      <a href="photography-help.html">PHOTOGRAPHY WALKS</a>
+      <a href="coaching.html" class="end-cta">GET IN TOUCH <span class="arrow">↗</span></a>
+      <div class="end-col-note">1:1 SESSIONS &nbsp;/&nbsp; ALL LEVELS</div>
+    </div>
+
+    <div class="end-marquee" aria-hidden="true">
+      <div class="end-marquee-track">
+        <div class="end-marquee-group">
+          <span class="end-marquee-word">FOOTBALL</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">MTB</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">PHOTOGRAPHY</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">SPORT</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">CHATGPT</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">CLAUDE</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">DEEPSEEK</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">GEMINI</span><span class="end-marquee-sep">✦</span>
+        </div>
+        <div class="end-marquee-group">
+          <span class="end-marquee-word">FOOTBALL</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">MTB</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">PHOTOGRAPHY</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">SPORT</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">CHATGPT</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">CLAUDE</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">DEEPSEEK</span><span class="end-marquee-sep">✦</span>
+          <span class="end-marquee-word">GEMINI</span><span class="end-marquee-sep">✦</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="end-bottom">
+      <div class="end-copy">© 2025 DYLAN &nbsp;/&nbsp; SPORT · OUTDOORS · PHOTOGRAPHY</div>
+      <a href="#home" class="end-top-link" onclick="switchPage('home', event)">BACK TO TOP <span class="arrow">↑</span></a>
+    </div>
+  </div>
+
+  </div><!-- /.stage -->
+</div><!-- /.stage-wrap -->
+
+  <!-- In-page navigation: all sections live on one continuous scroll page -->
+  <script>
+    // Scroll the matching page/section into view.
+    // pushHistory is false for back/forward and initial page load.
+    function scrollToPage(pageId, smooth, pushHistory) {
+      const target = document.getElementById(pageId);
+      if (!target) return;
+
+      const top = target.getBoundingClientRect().top + window.scrollY;
+
+      if (smooth) {
+        window.scrollTo({ top: top, behavior: 'smooth' });
+      } else {
+        window.scrollTo(0, top);
+      }
+
+      if (pushHistory) {
+        history.pushState(null, null, '#' + pageId);
+      }
+    }
+
+    // Kept with the same signature so existing nav/card markup keeps working.
+    function switchPage(pageId, event) {
+      if (event) event.preventDefault();
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      scrollToPage(pageId, !reduceMotion, true);
     }
 
     // Support browser back/forward buttons
     window.addEventListener('popstate', () => {
       const hash = window.location.hash.replace('#', '') || 'home';
-      const target = document.getElementById(hash);
-      if (target) {
-        switchPage(hash);
-      }
+      scrollToPage(hash, false, false);
     });
 
-    // Handle initial load hash
-    window.addEventListener('DOMContentLoaded', () => {
+    // Handle initial load hash. Run once after DOMContentLoaded and again
+    // after the load event, so the browser's own fragment scroll cannot
+    // leave the page slightly off the section top.
+    function scrollToInitialHash() {
       const hash = window.location.hash.replace('#', '');
       if (hash && document.getElementById(hash)) {
-        switchPage(hash);
+        scrollToPage(hash, false, false);
       }
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.__reloadToHome) window.scrollTo(0, 0);
+      scrollToInitialHash();
     });
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        if (window.__reloadToHome) window.scrollTo(0, 0);
+        scrollToInitialHash();
+      }, 0);
+    });
+
+    // Scale the 1440-wide design canvas to the window width.
+    // The six 900px pages plus the 3000px moments gallery form one long scroll.
+    (function () {
+      const stage = document.getElementById('stage');
+      const wrap = document.getElementById('stageWrap');
+      const DESIGN_W = 1440;
+
+      function fitStage() {
+        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        const scale = viewportWidth / DESIGN_W;
+
+        if ('zoom' in stage.style) {
+          // zoom scales the layout itself, so native position: sticky keeps
+          // working inside the stage (a transform would break it).
+          stage.style.zoom = scale;
+          stage.style.transform = '';
+          wrap.style.height = '';
+        } else {
+          // Fallback for browsers without CSS zoom.
+          stage.style.zoom = '';
+          stage.style.transform = 'scale(' + scale + ')';
+          wrap.style.height = (stage.offsetHeight * scale) + 'px';
+        }
+      }
+
+      fitStage();
+      window.addEventListener('resize', fitStage);
+      window.addEventListener('orientationchange', fitStage);
+    })();
+
+    // Pinned horizontal gallery: vertical scroll drives the collage sideways.
+    // The stage is scaled with CSS zoom, so the pin can use native
+    // position: sticky (a transform-scaled ancestor would break it).
+    (function () {
+      const section = document.getElementById('moments');
+      const pin = document.getElementById('momentsPin');
+      const track = document.getElementById('momentsTrack');
+      const ghost = document.getElementById('momentsGhost');
+      const fill = document.getElementById('momentsFill');
+      if (!section || !pin || !track || !fill) return;
+
+      const TRACK_SHIFT = 2500; // 3940px track - 1440px viewport
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      let target = 0;
+      let current = 0;
+      let rafId = null;
+
+      function paint() {
+        track.style.transform = 'translate3d(' + (-TRACK_SHIFT * current) + 'px, 0, 0)';
+        if (ghost) {
+          ghost.style.transform = 'translate3d(' + (-TRACK_SHIFT * 0.55 * current) + 'px, 0, 0)';
+        }
+        fill.style.transform = 'scaleX(' + current + ')';
+      }
+
+      function tick() {
+        current += (target - current) * 0.12;
+        if (Math.abs(target - current) < 0.0008) current = target;
+        paint();
+        rafId = current === target ? null : requestAnimationFrame(tick);
+      }
+
+      function measure() {
+        const rect = section.getBoundingClientRect();
+        const pinRect = pin.getBoundingClientRect();
+        const span = rect.height - pinRect.height;
+        const progressPx = Math.min(Math.max(-rect.top, 0), span);
+
+        // The pin itself is position: sticky, so there is no vertical JS
+        // compensation here; only the collage moves horizontally.
+        target = span > 0 ? progressPx / span : 0;
+
+        if (reduceMotion.matches) {
+          current = target;
+          paint();
+          return;
+        }
+
+        if (rafId === null) rafId = requestAnimationFrame(tick);
+      }
+
+      window.addEventListener('scroll', measure, { passive: true });
+      window.addEventListener('resize', measure);
+      window.addEventListener('orientationchange', measure);
+      window.addEventListener('load', measure);
+      measure();
+    })();
   </script>
 </body>
 </html>

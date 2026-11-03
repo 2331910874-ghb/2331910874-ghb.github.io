@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PHOTOGRAPHY WALKS / DYLAN</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Jim+Nightshade&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="stage-wrap" id="stageWrap">
+  <div class="stage" id="stage">
+
+    <div class="page-container page-help page-photography-help" id="photography-help">
+      <div class="brand-title" onclick="window.location.href='index.html#home'">D Y L A N &nbsp; / &nbsp; PORTFOLIO</div>
+      <nav class="nav-links">
+        <a href="index.html#home" class="nav-link">HOME</a>
+        <a href="index.html#about" class="nav-link">ABOUT</a>
+        <a href="index.html#work" class="nav-link">WORK</a>
+        <a href="index.html#football" class="nav-link">FOOTBALL</a>
+        <a href="index.html#mtb" class="nav-link">MTB</a>
+        <a href="index.html#photography" class="nav-link active">PHOTOGRAPHY</a>
+      </nav>
+      <div class="top-divider top-divider-dark"></div>
+
+      <div class="help-tag">PHOTOGRAPHY WALKS / 1:1 FEEDBACK</div>
+      <h2 class="help-title">NOTICE<br>MORE.</h2>
+      <div class="help-subtitle">A WALK, THREE PHOTOS, AND THREE THINGS TO TRY NEXT TIME.</div>
+
+      <p class="help-intro">
+        I take photos while travelling and between sport. I’m not a professional photographer, but I can help you slow down, notice light and colour, and make stronger choices with the camera you already have.
+      </p>
+
+      <div class="help-details">
+        <div class="help-field">
+          <div class="help-label">WHO</div>
+          <div class="help-text">Friends, classmates, or travellers who want better phone or camera photos. All levels.</div>
+        </div>
+        <div class="help-field">
+          <div class="help-label">WHAT WE’LL DO</div>
+          <div class="help-text">A walk with three things to notice: light, colour, and composition. We shoot together, then review three of your photos and agree on three changes for next time.</div>
+        </div>
+        <div class="help-field">
+          <div class="help-label">EXPERIENCE</div>
+          <div class="help-text">My portfolio includes city, landscape, and travel images. I explain why a photo works in plain language, without jargon.</div>
+        </div>
+        <div class="help-field">
+          <div class="help-label">TIME</div>
+          <div class="help-text">One 1–2 hour walk a month, plus about 20 minutes of feedback by message.</div>
+        </div>
+        <div class="help-field">
+          <div class="help-label">WHAT TO BRING</div>
+          <div class="help-text">Any camera, including a phone. Comfortable shoes and one place you’ve been wanting to photograph.</div>
+        </div>
+        <div class="help-field">
+          <div class="help-label">HOW TO START</div>
+          <div class="help-text">Use the GET IN TOUCH link on my Photography page, or ask me in person. Send three photos you like and one thing you want to improve.</div>
+        </div>
+      </div>
+
+      <img src="assets/help-photo-main.jpg" alt="Mountain landscape" class="help-img-main" />
+      <img src="assets/help-photo-1.jpg" alt="Pagoda and trees" class="help-img-small1" />
+      <img src="assets/help-photo-2.jpg" alt="Temple at sunset" class="help-img-small2" />
+      <div class="help-img-caption">PHOTOGRAPHY &nbsp;/&nbsp; ONE WALK AT A TIME &nbsp;/&nbsp; 2025</div>
+
+      <div class="bottom-divider"></div>
+      <div class="copyright">© 2025 DYLAN &nbsp;/&nbsp; SPORT · OUTDOORS · PHOTOGRAPHY</div>
+      <a href="index.html#photography" class="contact-link">BACK TO PHOTOGRAPHY <span class="arrow">↑</span></a>
+    </div>
+
+  </div><!-- /.stage -->
+</div><!-- /.stage-wrap -->
+
+  <script>
+    (function () {
+      const stage = document.getElementById('stage');
+      const wrap = document.getElementById('stageWrap');
+      const DESIGN_W = 1440;
+      const DESIGN_H = 900;
+
+      function fitStage() {
+        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        const scale = viewportWidth / DESIGN_W;
+        if ('zoom' in stage.style) {
+          stage.style.zoom = scale;
+          stage.style.transform = '';
+          wrap.style.height = '';
+        } else {
+          stage.style.zoom = '';
+          stage.style.transform = 'scale(' + scale + ')';
+          wrap.style.height = (DESIGN_H * scale) + 'px';
+        }
+      }
+
+      fitStage();
+      window.addEventListener('resize', fitStage);
+      window.addEventListener('orientationchange', fitStage);
+    })();
+  </script>
+</body>
+</html>
