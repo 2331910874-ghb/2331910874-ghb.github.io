@@ -30,6 +30,9 @@ body {
   position: relative;
   width: 100%;
   flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  overflow-x: clip;
 }
 
 /* Responsive stage: the 1440 x 900 canvas is scaled to the window width.
@@ -49,6 +52,21 @@ body {
   position: relative;
   background-color: #171717;
   overflow: hidden;
+  margin: 0 auto;
+}
+
+/* The hero stays pinned while the bike rides across the full page width,
+   then the whole section is released and scrolls away normally. */
+.home-scroll {
+  position: relative;
+  width: 1440px;
+  height: 1500px; /* 900px page + 600px pinned ride */
+  background-color: #171717;
+}
+
+.home-scroll .page-home {
+  position: sticky;
+  top: 0;
   margin: 0 auto;
 }
 
@@ -147,7 +165,7 @@ body {
 .contact-link {
   position: absolute;
   left: 1050px;
-  top: 865px;
+  top: 745px;
   width: 326px;
   text-align: right;
   color: #B8B4AE;
@@ -177,7 +195,7 @@ body {
 =================================================== */
 .page-home .hero-img-box {
   position: absolute;
-  left: 637px;
+  left: 0;
   top: 109px;
   width: 691px;
   height: 687px;
@@ -192,6 +210,96 @@ body {
   object-position: center;
   display: block;
 }
+
+/* Two spinning wheel layers sit behind the rider photo. The cut-out bike has
+   hollow rims, so the spoke art shows through the transparent wheel interiors
+   while the frame, fork and rotors stay in front of it. */
+.page-home .hero-wheel {
+  position: absolute;
+  width: 38%;
+  aspect-ratio: 1 / 1;
+  z-index: 0;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+  will-change: transform, filter;
+}
+
+.page-home .hero-wheel img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.page-home .hero-wheel-rear {
+  left: 0%;
+  top: 60.35%;
+}
+
+.page-home .hero-wheel-front {
+  left: 61.45%;
+  top: 61.45%;
+}
+
+/* The tyre + rim of each wheel, cut out of the photo, rotating above the
+   rider. A static conic mask hides the arcs where the fork, hose, leg and
+   chainstay are in front of the tyre, so those parts never spin. */
+.page-home .hero-wheel-ring {
+  position: absolute;
+  width: 38%;
+  aspect-ratio: 1 / 1;
+  z-index: 3;
+  pointer-events: none;
+  -webkit-mask-image: conic-gradient(from 0deg, #000 0deg 252deg, transparent 260deg 290deg, #000 298deg 304deg, transparent 312deg 356deg, #000 360deg);
+  mask-image: conic-gradient(from 0deg, #000 0deg 252deg, transparent 260deg 290deg, #000 298deg 304deg, transparent 312deg 356deg, #000 360deg);
+}
+
+.page-home .hero-wheel-ring img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform-origin: 50% 50%;
+  will-change: transform, filter;
+  animation: heroWheelSpin 2.4s linear infinite;
+}
+
+html.hero-motion-ready .page-home .hero-wheel-ring img {
+  animation: none;
+}
+
+.page-home .hero-ring-rear {
+  left: 0%;
+  top: 60.35%;
+  -webkit-mask-image: conic-gradient(from 0deg, transparent 0deg 142deg, #000 150deg 350deg, transparent 358deg 360deg);
+  mask-image: conic-gradient(from 0deg, transparent 0deg 142deg, #000 150deg 350deg, transparent 358deg 360deg);
+}
+
+.page-home .hero-ring-front {
+  left: 61.45%;
+  top: 61.45%;
+}
+
+.page-home .hero-img-box .hero-rider {
+  position: relative;
+  z-index: 1;
+}
+
+/* Pure-CSS fallback: the wheels start turning before (and even without)
+   hero-motion.js. As soon as the script initialises it adds
+   .hero-motion-ready to <html> and takes over the transform itself. */
+.page-home .hero-wheel {
+  animation: heroWheelSpin 2.4s linear infinite;
+}
+
+html.hero-motion-ready .page-home .hero-wheel {
+  animation: none;
+}
+
+@keyframes heroWheelSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+
 
 .page-home .role-subheading {
   position: absolute;
@@ -208,32 +316,33 @@ body {
 
 .page-home .hero-title {
   position: absolute;
-  left: 64px;
-  top: 136px;
-  width: 690px;
+  left: 40px;
+  top: 181px;
+  width: 1400px;
   color: #E53935;
-  font-size: 96px;
+  font-size: 212px;
   font-family: 'Jim Nightshade', cursive;
   font-weight: 400;
-  line-height: 1.05;
-  letter-spacing: 0.02em;
+  line-height: 0.94;
+  letter-spacing: 0.005em;
   word-wrap: break-word;
-  z-index: 2;
+  /* Sits behind the cut-out rider: the type runs through the bike and
+     reappears in the transparent gaps, weaving in and out of the photo. */
+  z-index: 0;
+  pointer-events: none;
   user-select: none;
 }
 
-.page-home .hero-intro {
+.page-home .hero-line {
+  display: block;
+  white-space: nowrap;
+}
+
+/* Second line drops down to the wheels, leaving clear air under line one. */
+.page-home .hero-line-2 {
   position: absolute;
-  left: 68px;
-  top: 400px;
-  width: 520px;
-  color: #B8B4AE;
-  font-size: 18px;
-  font-weight: 400;
-  line-height: 1.6;
-  letter-spacing: 0.01em;
-  word-wrap: break-word;
-  z-index: 2;
+  left: 0;
+  top: 338px;
 }
 
 .page-home .statement-accent-bar {
@@ -290,10 +399,10 @@ body {
 .page-about .about-title {
   position: absolute;
   left: 742px;
-  top: 160px;
-  width: 600px;
+  top: 158px;
+  width: 680px;
   color: #E53935;
-  font-size: 55px;
+  font-size: 66px;
   font-family: 'Jim Nightshade', cursive;
   font-weight: 400;
   line-height: 1.1;
@@ -411,11 +520,11 @@ body {
 .page-work .work-title {
   position: absolute;
   left: 64px;
-  top: 128px;
-  width: 950px;
-  height: 142px;
+  top: 124px;
+  width: 1050px;
+  height: 160px;
   color: #E53935;
-  font-size: 57px;
+  font-size: 66px;
   font-family: 'Jim Nightshade', cursive;
   font-weight: 400;
   line-height: 1.15;
@@ -430,7 +539,7 @@ body {
   left: 64px;
   top: 290px;
   width: 408px;
-  height: 360px;
+  height: 300px;
   border-radius: 8px;
   object-fit: cover;
   z-index: 1;
@@ -439,7 +548,7 @@ body {
 .page-work .card1-num {
   position: absolute;
   left: 64px;
-  top: 670px;
+  top: 610px;
   width: 50px;
   color: #B8B4AE;
   font-size: 12px;
@@ -451,10 +560,10 @@ body {
 .page-work .card1-title {
   position: absolute;
   left: 64px;
-  top: 700px;
+  top: 640px;
   width: 400px;
   color: #E53935;
-  font-size: 20px;
+  font-size: 23px;
   font-weight: 700;
   letter-spacing: 0.04em;
   word-wrap: break-word;
@@ -464,7 +573,7 @@ body {
 .page-work .card1-desc {
   position: absolute;
   left: 64px;
-  top: 738px;
+  top: 678px;
   width: 390px;
   color: #F4F1EC;
   font-size: 14px;
@@ -480,7 +589,7 @@ body {
   left: 502px;
   top: 290px;
   width: 408px;
-  height: 360px;
+  height: 300px;
   border-radius: 8px;
   object-fit: cover;
   z-index: 1;
@@ -489,7 +598,7 @@ body {
 .page-work .card2-num {
   position: absolute;
   left: 506px;
-  top: 670px;
+  top: 610px;
   width: 50px;
   color: #B8B4AE;
   font-size: 12px;
@@ -501,10 +610,10 @@ body {
 .page-work .card2-title {
   position: absolute;
   left: 506px;
-  top: 700px;
+  top: 640px;
   width: 400px;
   color: #E53935;
-  font-size: 20px;
+  font-size: 23px;
   font-weight: 700;
   letter-spacing: 0.04em;
   word-wrap: break-word;
@@ -514,7 +623,7 @@ body {
 .page-work .card2-desc {
   position: absolute;
   left: 506px;
-  top: 738px;
+  top: 678px;
   width: 390px;
   color: #F4F1EC;
   font-size: 14px;
@@ -530,7 +639,7 @@ body {
   left: 940px;
   top: 290px;
   width: 408px;
-  height: 360px;
+  height: 300px;
   border-radius: 8px;
   object-fit: cover;
   z-index: 1;
@@ -539,7 +648,7 @@ body {
 .page-work .card3-num {
   position: absolute;
   left: 948px;
-  top: 670px;
+  top: 610px;
   width: 50px;
   color: #B8B4AE;
   font-size: 12px;
@@ -551,10 +660,10 @@ body {
 .page-work .card3-title {
   position: absolute;
   left: 948px;
-  top: 700px;
+  top: 640px;
   width: 400px;
   color: #E53935;
-  font-size: 20px;
+  font-size: 23px;
   font-weight: 700;
   letter-spacing: 0.04em;
   word-wrap: break-word;
@@ -564,7 +673,7 @@ body {
 .page-work .card3-desc {
   position: absolute;
   left: 948px;
-  top: 738px;
+  top: 678px;
   width: 390px;
   color: #F4F1EC;
   font-size: 14px;
@@ -595,11 +704,11 @@ body {
 .page-football .football-title {
   position: absolute;
   left: 64px;
-  top: 129px;
+  top: 124px;
   width: 760px;
-  height: 74px;
+  height: 92px;
   color: #E53935;
-  font-size: 70px;
+  font-size: 80px;
   font-family: 'Jim Nightshade', cursive;
   font-weight: 400;
   word-wrap: break-word;
@@ -689,7 +798,7 @@ body {
   width: 360px;
   height: 28px;
   color: #E53935;
-  font-size: 21px;
+  font-size: 23px;
   font-weight: 700;
   word-wrap: break-word;
   z-index: 3;
@@ -716,7 +825,7 @@ body {
   width: 360px;
   height: 28px;
   color: #E53935;
-  font-size: 21px;
+  font-size: 23px;
   font-weight: 700;
   word-wrap: break-word;
   z-index: 3;
@@ -743,7 +852,7 @@ body {
   width: 360px;
   height: 28px;
   color: #E53935;
-  font-size: 21px;
+  font-size: 23px;
   font-weight: 700;
   word-wrap: break-word;
   z-index: 3;
@@ -781,11 +890,11 @@ body {
 .page-mtb .mtb-title {
   position: absolute;
   left: 64px;
-  top: 148px;
-  width: 736px;
-  height: 57px;
+  top: 142px;
+  width: 880px;
+  height: 92px;
   color: #E53935;
-  font-size: 70px;
+  font-size: 80px;
   font-family: 'Jim Nightshade', cursive;
   font-weight: 400;
   word-wrap: break-word;
@@ -845,7 +954,7 @@ body {
   top: 363px;
   width: 360px;
   color: #E53935;
-  font-size: 20px;
+  font-size: 23px;
   font-weight: 700;
   word-wrap: break-word;
   z-index: 2;
@@ -867,10 +976,10 @@ body {
 .page-mtb .mtb-section2-title {
   position: absolute;
   left: 962px;
-  top: 493px;
+  top: 470px;
   width: 360px;
   color: #E53935;
-  font-size: 20px;
+  font-size: 23px;
   font-weight: 700;
   word-wrap: break-word;
   z-index: 2;
@@ -879,7 +988,7 @@ body {
 .page-mtb .mtb-section2-desc {
   position: absolute;
   left: 962px;
-  top: 529px;
+  top: 506px;
   width: 370px;
   color: #F4F1EC;
   font-size: 15px;
@@ -892,10 +1001,10 @@ body {
 .page-mtb .mtb-section3-title {
   position: absolute;
   left: 962px;
-  top: 648px;
+  top: 615px;
   width: 360px;
   color: #E53935;
-  font-size: 20px;
+  font-size: 23px;
   font-weight: 700;
   word-wrap: break-word;
   z-index: 2;
@@ -904,7 +1013,7 @@ body {
 .page-mtb .mtb-section3-desc {
   position: absolute;
   left: 962px;
-  top: 684px;
+  top: 651px;
   width: 370px;
   color: #F4F1EC;
   font-size: 15px;
@@ -977,11 +1086,11 @@ body {
 .page-photography .photo-title {
   position: absolute;
   left: 64px;
-  top: 127px;
+  top: 122px;
   width: 760px;
-  height: 65px;
+  height: 92px;
   color: #E53935;
-  font-size: 70px;
+  font-size: 80px;
   font-family: 'Jim Nightshade', cursive;
   font-weight: 400;
   word-wrap: break-word;
@@ -992,7 +1101,7 @@ body {
 .page-photography .photo-subtitle {
   position: absolute;
   left: 64px;
-  top: 214px;
+  top: 226px;
   width: 900px;
   color: #F4F1EC;
   font-size: 16px;
@@ -1028,7 +1137,7 @@ body {
   left: 880px;
   top: 535px;
   width: 240px;
-  height: 240px;
+  height: 160px;
   border-radius: 8px;
   object-fit: cover;
   z-index: 1;
@@ -1039,7 +1148,7 @@ body {
   left: 1136px;
   top: 536px;
   width: 240px;
-  height: 240px;
+  height: 160px;
   border-radius: 8px;
   object-fit: cover;
   z-index: 1;
@@ -1064,7 +1173,7 @@ body {
 .page-mtb .mtb-coaching {
   position: absolute;
   left: 962px;
-  top: 750px;
+  top: 700px;
   width: 370px;
   padding-top: 14px;
   border-top: 1px solid #393939;
@@ -1360,7 +1469,7 @@ body {
   margin-top: 18px;
   color: #E53935;
   font-family: 'Jim Nightshade', cursive;
-  font-size: 76px;
+  font-size: 88px;
   font-weight: 400;
   line-height: 1.02;
   letter-spacing: 0.01em;
@@ -1453,7 +1562,7 @@ body {
   margin-top: 8px;
   color: #E53935;
   font-family: 'Jim Nightshade', cursive;
-  font-size: 38px;
+  font-size: 42px;
   font-weight: 400;
   line-height: 1.15;
   letter-spacing: 0.02em;
@@ -1485,7 +1594,7 @@ body {
   margin-top: 22px;
   color: #E53935;
   font-family: 'Jim Nightshade', cursive;
-  font-size: 40px;
+  font-size: 45px;
   font-weight: 400;
   line-height: 1.16;
   letter-spacing: 0.02em;
@@ -1727,12 +1836,8 @@ body {
   width: max-content;
   height: 70px;
   align-items: center;
-  animation: endMarquee 34s linear infinite;
+  animation: endMarquee 20s linear infinite;
   will-change: transform;
-}
-
-.end-marquee:hover .end-marquee-track {
-  animation-play-state: paused;
 }
 
 .end-marquee-group {
@@ -1831,7 +1936,7 @@ body {
 .page-football .football-help {
   position: absolute;
   left: 962px;
-  top: 748px;
+  top: 700px;
   width: 370px;
   padding-top: 14px;
   border-top: 1px solid #393939;
@@ -1877,7 +1982,7 @@ body {
 .page-photography .photo-help {
   position: absolute;
   left: 880px;
-  top: 782px;
+  top: 700px;
   width: 496px;
   padding-top: 12px;
   border-top: 1px solid #393939;
@@ -2061,4 +2166,97 @@ body {
 .page-coaching .coach-meta-red {
   top: 798px;
   color: #E53935;
+}
+
+/* ===================================================
+   GLOBAL FIXED NAVIGATION
+   Lives outside the zoomed stage, sized in vw so it
+   matches the 1440 design at every window width.
+=================================================== */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(70px * var(--s, 1));
+  background-color: #171717;
+  border-bottom: 1px solid #393939;
+  z-index: 1000;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.site-header-inner {
+  position: relative;
+  height: 100%;
+  width: calc(1440px * var(--s, 1));
+  margin: 0 auto;
+}
+
+.site-brand {
+  position: absolute;
+  left: calc(64px * var(--s, 1));
+  top: calc(28px * var(--s, 1));
+  color: #B8B4AE;
+  font-family: 'Inter', sans-serif;
+  font-size: calc(14px * var(--s, 1));
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.site-nav {
+  position: absolute;
+  right: calc(64px * var(--s, 1));
+  top: calc(30px * var(--s, 1));
+  display: flex;
+  gap: calc(32px * var(--s, 1));
+  font-family: 'Inter', sans-serif;
+  font-size: calc(13px * var(--s, 1));
+  font-weight: 500;
+}
+
+.site-nav a {
+  color: #B8B4AE;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  transition: color 0.2s ease;
+}
+
+.site-nav a:hover,
+.site-nav a.active {
+  color: #FFFFFF;
+}
+
+.site-header.line-red {
+  border-bottom-color: #E53935;
+}
+
+.site-header.on-cream {
+  background-color: #F4F1EC;
+  border-bottom-color: transparent;
+}
+
+.site-header.on-cream .site-brand {
+  color: #171717;
+}
+
+.site-header.on-cream .site-nav a {
+  color: #2F2F2F;
+}
+
+.site-header.on-cream .site-nav a:hover,
+.site-header.on-cream .site-nav a.active {
+  color: #E53935;
+}
+
+/* Hide the old per-page header; the fixed header replaces it. */
+.page-container > .brand-title,
+.page-container > .nav-links,
+.page-container > .top-divider,
+.moments-pin > .brand-title,
+.moments-pin > .nav-links,
+.moments-pin > .top-divider {
+  display: none;
 }

@@ -28,13 +28,28 @@
     })();
   </script>
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=24">
 </head>
 <body>
+<header class="site-header line-red" id="siteHeader">
+  <div class="site-header-inner">
+    <a href="#home" class="site-brand" onclick="switchPage('home', event)">D Y L A N &nbsp;/&nbsp; PORTFOLIO</a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="#home" data-target="home" class="active" onclick="switchPage('home', event)">HOME</a>
+      <a href="#about" data-target="about" onclick="switchPage('about', event)">ABOUT</a>
+      <a href="#work" data-target="work" onclick="switchPage('work', event)">WORK</a>
+      <a href="#football" data-target="football" onclick="switchPage('football', event)">FOOTBALL</a>
+      <a href="#mtb" data-target="mtb" onclick="switchPage('mtb', event)">MTB</a>
+      <a href="#photography" data-target="photography" onclick="switchPage('photography', event)">PHOTOGRAPHY</a>
+    </nav>
+  </div>
+</header>
+
 <div class="stage-wrap" id="stageWrap">
 <div class="stage" id="stage">
-  <!-- PAGE 1: HERO / HOME SECTION (1440px * 900px) -->
-  <div class="page-container page-home active" id="home">
+  <!-- PAGE 1: HERO / HOME SECTION — pinned for a full-width ride, then released -->
+  <section class="home-scroll" id="home">
+  <div class="page-container page-home active" id="homePin">
     <div class="brand-title" onclick="switchPage('home')">D Y L A N &nbsp; / &nbsp; PORTFOLIO</div>
     <nav class="nav-links">
       <a href="#home" class="nav-link active" onclick="switchPage('home', event)">HOME</a>
@@ -47,23 +62,31 @@
     <div class="top-divider top-divider-red"></div>
 
     <div class="hero-img-box">
-      <img src="assets/hero-mtb-cutout.png" alt="Dylan riding mountain bike" />
+      <div class="hero-wheel hero-wheel-rear" aria-hidden="true">
+        <img src="assets/wheel-spokes.png" alt="" />
+      </div>
+      <div class="hero-wheel hero-wheel-front" aria-hidden="true">
+        <img src="assets/wheel-spokes.png" alt="" />
+      </div>
+      <img class="hero-rider" src="assets/hero-mtb-cutout.png" alt="Dylan riding mountain bike" />
+      <div class="hero-wheel-ring hero-ring-rear" aria-hidden="true">
+        <img src="assets/wheel-ring-rear.png?v=24" alt="" />
+      </div>
+      <div class="hero-wheel-ring hero-ring-front" aria-hidden="true">
+        <img src="assets/wheel-ring-front.png?v=24" alt="" />
+      </div>
     </div>
 
     <div class="role-subheading">ATHLETE &nbsp;/&nbsp; OUTDOOR EXPLORER &nbsp;/&nbsp; PHOTOGRAPHER</div>
     
     <h1 class="hero-title">
-      MADE TO MOVE.<br>
-      BUILT TO NOTICE.
+      <span class="hero-line hero-line-1">MADE TO MOVE.</span>
+      <span class="hero-line hero-line-2">BUILT TO NOTICE.</span>
     </h1>
-
-    <p class="hero-intro">
-      I’m Dylan — I play football, ride mountain bikes, and take photos of the places and moments I don’t want to forget.
-    </p>
 
     <div class="statement-accent-bar"></div>
     <p class="statement-text">
-      A portfolio about facing challenges, staying curious, and recording the journey.
+      A portfolio about curiosity, challenge, and the journey.
     </p>
 
     <div class="bottom-divider"></div>
@@ -71,10 +94,8 @@
     <div class="copyright">
       © 2025 DYLAN &nbsp;/&nbsp; SPORT · OUTDOORS · PHOTOGRAPHY
     </div>
-    <a href="coaching.html" class="contact-link">
-      CONTACT &nbsp;/&nbsp; GET IN TOUCH <span class="arrow">↗</span>
-    </a>
   </div>
+  </section>
 
   <!-- PAGE 2: ABOUT SECTION (1440px * 900px) -->
   <div class="page-container page-about" id="about">
@@ -103,7 +124,7 @@
     </h2>
 
     <div class="about-narrative">
-      I’m someone who loves sport, games, and exploring new places. Football has taught me to trust a team and keep going under pressure. Mountain biking pushes me to read the terrain, make decisions, and learn from every ride. When I travel, photography helps me slow down and notice light, colour, and small details.<br><br>I want this portfolio to show more than results. It’s about how I meet challenges, reflect on mistakes, and keep doing the things I care about.
+      I love sport, games, and exploring new places. Football taught me to trust a team under pressure; mountain biking taught me to read terrain and learn from every ride. Photography helps me slow down and notice light, colour, and detail. This portfolio is about how I meet challenges — not just results.
     </div>
 
     <div class="about-mid-divider"></div>
@@ -144,22 +165,22 @@
     <h2 class="work-title">THREE WAYS TO<br>EXPERIENCE THE WORLD.</h2>
 
     <!-- Card 1: Football (Clickable to jump to Football page) -->
-    <img src="assets/card-football.png" alt="Football" class="card1-img card-clickable" onclick="switchPage('football')" />
+    <img src="assets/card-football-catch.png" alt="Football" class="card1-img card-clickable" onclick="switchPage('football')" />
     <div class="card1-num card-clickable" onclick="switchPage('football')">01</div>
     <div class="card1-title card-clickable" onclick="switchPage('football')">FOOTBALL</div>
-    <div class="card1-desc card-clickable" onclick="switchPage('football')">Teamwork, pressure, and learning to keep moving.</div>
+    <div class="card1-desc card-clickable" onclick="switchPage('football')">Teamwork, pressure, and keeping moving.</div>
 
     <!-- Card 2: Mountain Biking (Clickable to jump to MTB page) -->
     <img src="assets/card-mtb.png" alt="Mountain Biking" class="card2-img card-clickable" onclick="switchPage('mtb')" />
     <div class="card2-num card-clickable" onclick="switchPage('mtb')">02</div>
     <div class="card2-title card-clickable" onclick="switchPage('mtb')">MOUNTAIN BIKING</div>
-    <div class="card2-desc card-clickable" onclick="switchPage('mtb')">Reading terrain, solving problems, and progressing.</div>
+    <div class="card2-desc card-clickable" onclick="switchPage('mtb')">Reading terrain and solving problems.</div>
 
     <!-- Card 3: Photography (Clickable to jump to Photography page) -->
     <img src="assets/card-photography.png" alt="Photography" class="card3-img card-clickable" onclick="switchPage('photography')" />
     <div class="card3-num card-clickable" onclick="switchPage('photography')">03</div>
     <div class="card3-title card-clickable" onclick="switchPage('photography')">PHOTOGRAPHY</div>
-    <div class="card3-desc card-clickable" onclick="switchPage('photography')">Noticing light, colour, and moments worth keeping.</div>
+    <div class="card3-desc card-clickable" onclick="switchPage('photography')">Light, colour, and moments worth keeping.</div>
 
     <div class="bottom-divider"></div>
 
@@ -193,7 +214,7 @@
         <div class="moments-intro">
           <div class="moments-tag">MOMENTS / BETWEEN THE LINES</div>
           <h2 class="moments-title">KEEP<br>LOOKING.</h2>
-          <p class="moments-copy">The rides, games, and places I don’t want to forget — collected frame by frame.</p>
+          <p class="moments-copy">Rides, games, and places I don’t want to forget — frame by frame.</p>
           <div class="moments-rule"></div>
           <div class="moments-scroll-hint">SCROLL TO EXPLORE <span class="arrow">→</span></div>
         </div>
@@ -267,7 +288,7 @@
     <div class="football-subtitle">THE GAME. THE TEAM. THE GROWTH.</div>
 
     <img 
-      src="assets/football-hero.png" 
+      src="assets/football-court.png" 
       alt="Football match and training" 
       class="football-hero-img" 
     />
@@ -278,10 +299,10 @@
     <div class="football-card-role">ROLE / TEAM MEMBER</div>
 
     <div class="football-section1-title">WHY FOOTBALL?</div>
-    <div class="football-section1-desc">Football is not something I do alone. It is about teamwork, trust, and trying again after things don’t go to plan.</div>
+    <div class="football-section1-desc">Football is a team game: trust, and trying again when plans fall apart.</div>
 
     <div class="football-section2-title">WHAT I DID</div>
-    <div class="football-section2-desc">In 2025, I took part in football training and games, working on fitness, tactics, contact, and coordination with teammates.</div>
+    <div class="football-section2-desc">In 2025 I trained and played, building fitness, tactics, contact, and coordination.</div>
 
     <div class="football-section3-title">WHAT I LEARNED</div>
     <div class="football-section3-desc">Strength also means staying focused and moving forward under pressure.</div>
@@ -298,9 +319,6 @@
     <div class="copyright">
       © 2025 DYLAN &nbsp;/&nbsp; SPORT · OUTDOORS · PHOTOGRAPHY
     </div>
-    <a href="football-help.html" class="contact-link football-contact-link">
-      FOOTBALL PRACTICE &nbsp;/&nbsp; GET IN TOUCH <span class="arrow">↗</span>
-    </a>
   </div>
 
   <!-- PAGE 5: PROJECT 02 / MTB (1440px * 900px) -->
@@ -330,10 +348,10 @@
     <div class="mtb-card-role">ROLE / MOUNTAIN BIKER</div>
 
     <div class="mtb-section1-title">WHY MTB?</div>
-    <div class="mtb-section1-desc">Mountain biking connects my love of the outdoors and speed with the challenge of making decisions in uncertain terrain.</div>
+    <div class="mtb-section1-desc">Mountain biking pairs the outdoors and speed with decisions in uncertain terrain.</div>
 
     <div class="mtb-section2-title">THE PROCESS</div>
-    <div class="mtb-section2-desc">Each route asks for different control, focus, and energy. I reflect on what went wrong and try not to repeat the same mistake on the next ride.</div>
+    <div class="mtb-section2-desc">Every route asks for control, focus, and energy. I reflect on mistakes and try not to repeat them.</div>
 
     <div class="mtb-section3-title">WHAT I’M BUILDING</div>
     <div class="mtb-section3-desc">Better judgement, confidence, and persistence — one trail at a time.</div>
@@ -355,9 +373,6 @@
     <div class="copyright">
       © 2025 DYLAN &nbsp;/&nbsp; SPORT · OUTDOORS · PHOTOGRAPHY
     </div>
-    <a href="coaching.html" class="contact-link mtb-contact-link">
-      MTB COACHING &nbsp;/&nbsp; GET IN TOUCH <span class="arrow">↗</span>
-    </a>
   </div>
 
   <!-- PAGE 6: PROJECT 03 / PHOTOGRAPHY (1440px * 900px) -->
@@ -383,7 +398,7 @@
     <img src="assets/photo-bottom2.png" alt="Photography detail 2" class="photo-img-bottom2" />
 
     <div class="photo-desc">
-      Photography gives me a different way to explore. While travelling or taking a break from sport, I stop to notice the way light changes a place, how colours work together, and which moments feel worth remembering.
+      Photography is how I explore between sports: noticing how light changes a place, how colours work together, and which moments are worth keeping.
     </div>
 
     <div class="photo-help">
@@ -398,9 +413,6 @@
     <div class="copyright">
       © 2025 DYLAN &nbsp;/&nbsp; SPORT · OUTDOORS · PHOTOGRAPHY
     </div>
-    <a href="photography-help.html" class="contact-link photography-contact-link">
-      PHOTOGRAPHY WALKS &nbsp;/&nbsp; GET IN TOUCH <span class="arrow">↗</span>
-    </a>
   </div>
 
 
@@ -543,10 +555,14 @@
       const stage = document.getElementById('stage');
       const wrap = document.getElementById('stageWrap');
       const DESIGN_W = 1440;
+      const DESIGN_H = 900;
 
       function fitStage() {
         const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        // Fill the window edge to edge. The canvas keeps its 16:10 ratio, so on
+        // wide windows the bottom of each page sits just below the fold.
         const scale = viewportWidth / DESIGN_W;
+        document.documentElement.style.setProperty('--s', scale);
 
         if ('zoom' in stage.style) {
           // zoom scales the layout itself, so native position: sticky keeps
@@ -625,6 +641,39 @@
       window.addEventListener('load', measure);
       measure();
     })();
+
+    // Fixed navigation: scroll spy + cream header on the final page.
+    (function () {
+      const header = document.getElementById('siteHeader');
+      if (!header) return;
+      const links = Array.from(header.querySelectorAll('.site-nav a'));
+      const sections = ['home','about','work','moments','football','mtb','photography','end']
+        .map(id => document.getElementById(id)).filter(Boolean);
+
+      function updateHeader() {
+        const headerHeight = header.getBoundingClientRect().height;
+        let current = 'home';
+        for (const section of sections) {
+          if (section.getBoundingClientRect().top <= headerHeight + 4) current = section.id;
+        }
+        const isEnd = current === 'end';
+        header.classList.toggle('on-cream', isEnd);
+        header.classList.toggle('line-red', current === 'home');
+        let active = current === 'moments' ? 'work' : current;
+        if (isEnd) active = '';
+        links.forEach(link => {
+          link.classList.toggle('active', link.dataset.target === active);
+        });
+      }
+
+      window.addEventListener('scroll', updateHeader, { passive: true });
+      window.addEventListener('resize', updateHeader);
+      window.addEventListener('load', updateHeader);
+      updateHeader();
+    })();
+
   </script>
+  <script src="hero-motion.js?v=24"></script>
+  <script src="marquee.js?v=24"></script>
 </body>
 </html>

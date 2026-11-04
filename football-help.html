@@ -9,9 +9,23 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Jim+Nightshade&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=23">
 </head>
 <body>
+<header class="site-header" id="siteHeader">
+  <div class="site-header-inner">
+    <a href="index.html#home" class="site-brand">D Y L A N &nbsp;/&nbsp; PORTFOLIO</a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="index.html#home">HOME</a>
+      <a href="index.html#about">ABOUT</a>
+      <a href="index.html#work">WORK</a>
+      <a href="index.html#football" class="active">FOOTBALL</a>
+      <a href="index.html#mtb">MTB</a>
+      <a href="index.html#photography">PHOTOGRAPHY</a>
+    </nav>
+  </div>
+</header>
+
 <div class="stage-wrap" id="stageWrap">
   <div class="stage" id="stage">
 
@@ -85,6 +99,7 @@
       function fitStage() {
         const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
         const scale = viewportWidth / DESIGN_W;
+        document.documentElement.style.setProperty('--s', scale);
         if ('zoom' in stage.style) {
           stage.style.zoom = scale;
           stage.style.transform = '';
