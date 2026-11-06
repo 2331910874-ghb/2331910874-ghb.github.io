@@ -28,7 +28,7 @@
     })();
   </script>
 
-  <link rel="stylesheet" href="style.css?v=24">
+  <link rel="stylesheet" href="style.css?v=27">
 </head>
 <body>
 <header class="site-header line-red" id="siteHeader">
@@ -70,10 +70,10 @@
       </div>
       <img class="hero-rider" src="assets/hero-mtb-cutout.png" alt="Dylan riding mountain bike" />
       <div class="hero-wheel-ring hero-ring-rear" aria-hidden="true">
-        <img src="assets/wheel-ring-rear.png?v=24" alt="" />
+        <img src="assets/wheel-ring-rear.png?v=27" alt="" />
       </div>
       <div class="hero-wheel-ring hero-ring-front" aria-hidden="true">
-        <img src="assets/wheel-ring-front.png?v=24" alt="" />
+        <img src="assets/wheel-ring-front.png?v=27" alt="" />
       </div>
     </div>
 
@@ -338,6 +338,11 @@
     <h2 class="mtb-title">RIDE INTO THE UNKNOWN.</h2>
     <div class="mtb-subtitle">RIDE FURTHER. LEARN FROM EVERY LINE.</div>
 
+    <a href="mtb-game-3d.html" class="mtb-play-btn">
+      <span class="play-tri">▶</span> PLAY MTB 3D
+    </a>
+    <a href="mtb-game.html" class="mtb-play-2d">2D VERSION</a>
+
     <img 
       src="assets/mtb-hero.png" 
       alt="Mountain Biking Trail" 
@@ -459,6 +464,8 @@
       <a href="photography-help.html">PHOTOGRAPHY WALKS</a>
       <a href="coaching.html" class="end-cta">GET IN TOUCH <span class="arrow">↗</span></a>
       <div class="end-col-note">1:1 SESSIONS &nbsp;/&nbsp; ALL LEVELS</div>
+      <a href="mailto:2331910874@qq.com" class="end-email" id="endEmail" onclick="copyEmail(event)" title="Click to copy">2331910874@qq.com</a>
+      <div class="end-email-hint">CLICK TO COPY</div>
     </div>
 
     <div class="end-marquee" aria-hidden="true">
@@ -673,7 +680,38 @@
     })();
 
   </script>
-  <script src="hero-motion.js?v=24"></script>
-  <script src="marquee.js?v=24"></script>
+  <script src="hero-motion.js?v=27"></script>
+  <script src="marquee.js?v=27"></script>
+<div class="copy-toast" id="copyToast">EMAIL COPIED</div>
+
+<script>
+  function copyEmail(e) {
+    if (e) e.preventDefault();
+    var email = '2331910874@qq.com';
+    function done() {
+      var t = document.getElementById('copyToast');
+      t.classList.add('show');
+      clearTimeout(window.__copyT);
+      window.__copyT = setTimeout(function () { t.classList.remove('show'); }, 1600);
+    }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = email;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (err) {}
+      document.body.removeChild(ta);
+      done();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(email).then(done).catch(fallback);
+    } else {
+      fallback();
+    }
+    return false;
+  }
+</script>
 </body>
 </html>

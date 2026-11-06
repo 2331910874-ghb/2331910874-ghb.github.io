@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DESCEND 3D / MTB GAME</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Jim+Nightshade&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: radial-gradient(circle at 50% 38%, #241a1a 0%, #171717 45%, #0d0d0d 100%);
+    color: #F4F1EC;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+  }
+  #stage, #stage canvas { position: fixed; inset: 0; display: block; }
+
+  .top-links { position: fixed; left: 28px; top: 24px; z-index: 20; display: flex; gap: 10px; align-items: center; }
+  .chip {
+    color: #B8B4AE; font-size: 11px; font-weight: 700; letter-spacing: .16em;
+    text-decoration: none; padding: 10px 14px; border: 1px solid rgba(184,180,174,.25);
+    border-radius: 3px; background: rgba(23,23,23,.55); backdrop-filter: blur(6px);
+    transition: color .2s, border-color .2s;
+  }
+  .chip:hover { color: #fff; border-color: #E53935; }
+
+  .hud { position: fixed; right: 28px; top: 24px; z-index: 20; display: flex; gap: 28px; text-align: right; pointer-events: none; }
+  .stat-label { display:block; color:#7E7A74; font-size:9px; font-weight:700; letter-spacing:.18em; margin-bottom:4px; }
+  .stat-value { color:#F4F1EC; font-size:26px; font-weight:800; line-height:1; font-variant-numeric: tabular-nums; }
+  .stat-value small { font-size:11px; font-weight:600; color:#B8B4AE; margin-left:3px; }
+  .stat-value.speed { color:#E53935; }
+
+  .overlay {
+    position: fixed; inset: 0; z-index: 30; display:flex; align-items:center; justify-content:center;
+    padding: 24px; background: radial-gradient(circle at 50% 40%, rgba(23,23,23,.35) 0%, rgba(8,8,8,.82) 70%);
+    transition: opacity .25s ease;
+  }
+  .overlay.hidden { opacity:0; pointer-events:none; }
+  .panel { max-width: 580px; text-align:center; }
+  .eyebrow { color:#B8B4AE; font-size:10px; font-weight:700; letter-spacing:.24em; margin-bottom:18px; }
+  .title { font-family:'Jim Nightshade',cursive; font-weight:400; font-size:clamp(52px,8.5vw,92px); line-height:.95; color:#E53935; margin-bottom:18px; }
+  .subtitle { color:#B8B4AE; font-size:13px; line-height:1.7; margin-bottom:24px; }
+  .keys { display:flex; justify-content:center; gap:18px; flex-wrap:wrap; margin-bottom:28px; color:#8f8a83; font-size:11px; letter-spacing:.06em; }
+  .keys b { color:#F4F1EC; font-weight:700; }
+  .play {
+    display:inline-flex; align-items:center; gap:12px; padding:16px 30px;
+    background:#E53935; color:#F4F1EC; border:0; border-radius:4px;
+    font-family:inherit; font-size:12px; font-weight:700; letter-spacing:.16em; cursor:pointer;
+    transition: background .2s, color .2s, transform .2s;
+  }
+  .play:hover { background:#F4F1EC; color:#E53935; transform:translateY(-2px); }
+  .result { color:#F4F1EC; font-size:15px; margin-bottom:22px; letter-spacing:.04em; }
+  .result b { color:#E53935; font-size:22px; }
+  .result .best { display:block; margin-top:8px; color:#B8B4AE; font-size:12px; }
+
+  .touch { position: fixed; left:0; right:0; bottom:22px; z-index:25; display:none; justify-content:space-between; padding:0 22px; pointer-events:none; }
+  .touch button {
+    pointer-events:auto; width:68px; height:68px; border-radius:50%;
+    border:1px solid rgba(244,241,236,.3); background:rgba(23,23,23,.6);
+    backdrop-filter: blur(6px); color:#F4F1EC; font-family:inherit;
+    font-size:10px; font-weight:700; letter-spacing:.1em; touch-action:none; user-select:none;
+  }
+  .touch .jump { border-color:#E53935; color:#E53935; }
+  .touch .pad { display:flex; gap:10px; }
+  .touch .pedal { width:64px; height:64px; align-self:flex-end; }
+  @media (hover: none) and (pointer: coarse) {
+    .touch { display:flex; }
+    .hud { right:18px; top:18px; gap:16px; }
+    .top-links { left:14px; top:14px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage"></div>
+
+<div class="top-links">
+  <a class="chip" href="index.html#mtb">&larr; BACK TO MTB</a>
+  <a class="chip" href="mtb-game.html">2D VERSION</a>
+</div>
+
+<div class="hud">
+  <div><span class="stat-label">SPEED</span><span class="stat-value speed" id="speed">0<small>KM/H</small></span></div>
+  <div><span class="stat-label">DISTANCE</span><span class="stat-value" id="distance">0<small>M</small></span></div>
+  <div><span class="stat-label">BEST</span><span class="stat-value" id="best">0<small>M</small></span></div>
+  <div><span class="stat-label">FLIPS</span><span class="stat-value" id="flips">0</span></div>
+</div>
+
+<div class="overlay" id="startOverlay">
+  <div class="panel">
+    <div class="eyebrow">DYLAN / 3D MINI GAME</div>
+    <h1 class="title">DESCEND 3D.</h1>
+    <p class="subtitle">Mountain downhill. Hold W to pedal, A / D to steer the front wheel, Space to jump. Land badly and the run ends.</p>
+    <div class="keys">
+      <span><b>W</b> Pedal</span>
+      <span><b>A / D</b> Steer front wheel</span>
+      <span><b>SPACE</b> Jump</span>
+      <span><b>Q / E</b> Front / back flip</span>
+      <span><b>R</b> Restart</span>
+    </div>
+    <button class="play" id="startBtn"><span>▶</span> RIDE</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="crashOverlay">
+  <div class="panel">
+    <div class="eyebrow">RUN ENDED</div>
+    <h1 class="title">WIPEOUT.</h1>
+    <p class="result">Distance <b id="runDistance">0</b> m<span class="best" id="bestLine"></span></p>
+    <button class="play" id="restartBtn"><span>▶</span> RIDE AGAIN</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="pauseOverlay">
+  <div class="panel">
+    <div class="eyebrow">PAUSED</div>
+    <h1 class="title">TAKE A BREATH.</h1>
+    <p class="subtitle">Press ESC or hit resume to continue.</p>
+    <button class="play" id="resumeBtn"><span>▶</span> RESUME</button>
+  </div>
+</div>
+
+<div class="touch">
+  <div class="pad">
+    <button data-key="left">LEFT</button>
+    <button data-key="right">RIGHT</button>
+  </div>
+  <div class="pad">
+    <button class="pedal" data-key="pedal">W</button>
+    <button class="jump" data-key="jump">JUMP</button>
+  </div>
+</div>
+
+<script src="vendor/three.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var BEST_KEY = 'dylan-mtb-3d-best';
+  var speedEl = document.getElementById('speed');
+  var distEl = document.getElementById('distance');
+  var bestEl = document.getElementById('best');
+  var flipsEl = document.getElementById('flips');
+  var startOverlay = document.getElementById('startOverlay');
+  var pauseOverlay = document.getElementById('pauseOverlay');
+  var crashOverlay = document.getElementById('crashOverlay');
+  var runDistanceEl = document.getElementById('runDistance');
+  var bestLineEl = document.getElementById('bestLine');
+
+  var scene, camera, renderer, clock;
+  var bike, frontSteer, wheels = [], shadow;
+  var chunks = [], trees = [], rocks = [], peaks = [], platforms = [], snow;
+  var state, best;
+  var keys = { left: false, right: false, pedal: false, jump: false, q: false, e: false };
+  var paused = false;
+
+  var CHUNK_LEN = 100, CHUNK_W = 320, NX = 40, NZ = 26, N_CHUNKS = 8;
+
+  best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0;
+  bestEl.innerHTML = best + '<small>M</small>';
+
+  // open mountain slope (no valley walls)
+  function smoothstep(t) {
+    t = Math.max(0, Math.min(1, t));
+    return t * t * (3 - 2 * t);
+  }
+
+  // dirt kickers (frequent) + wooden drop platforms (rare)
+  function featureHeight(x, z) {
+    var lat = Math.exp(-(x * x) / 100);
+    var h = 0;
+    var seg = Math.floor(z / 110);
+    for (var s = seg - 1; s <= seg + 1; s++) {
+      if (s < 0) continue;
+      var base = s * 110;
+      var isDrop = (s % 7 === 3);
+      if (isDrop) {
+        var zc = base + 40;
+        var t = z - zc;
+        if (t > -9 && t < 7) h += 3.0 * smoothstep((t + 9) / 9) * lat;
+        var t2 = z - (zc + 7);
+        if (t2 >= 0 && t2 < 26) h -= 0.24 * t2 * lat;
+      } else {
+        var zk = base + 55;
+        h += 4.5 * Math.exp(-Math.pow((z - zk) / 4.2, 2)) * lat;
+      }
+    }
+    return h;
+  }
+
+  function groundHeight(x, z) {
+    return featureHeight(x, z) - 0.32 * z
+      + 3.2 * Math.sin(z * 0.028)
+      + 1.6 * Math.sin(z * 0.09 + 1.1)
+      + 1.1 * Math.sin(x * 0.06 + z * 0.02)
+      + 0.5 * Math.sin(x * 0.2 - z * 0.03);
+  }
+
+  function slopeAt(x, z, fx, fz) {
+    var d = 0.9;
+    return (groundHeight(x + fx * d, z + fz * d) - groundHeight(x, z)) / d;
+  }
+
+  function init() {
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    document.getElementById('stage').appendChild(renderer.domElement);
+
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x241a18, 0.007);
+
+    var sky = document.createElement('canvas');
+    sky.width = 4; sky.height = 256;
+    var sctx = sky.getContext('2d');
+    var grad = sctx.createLinearGradient(0, 0, 0, 256);
+    grad.addColorStop(0, '#0b0b0b');
+    grad.addColorStop(0.5, '#151212');
+    grad.addColorStop(0.8, '#2c1e1b');
+    grad.addColorStop(1, '#432823');
+    sctx.fillStyle = grad;
+    sctx.fillRect(0, 0, 4, 256);
+    scene.background = new THREE.CanvasTexture(sky);
+
+    camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 600);
+
+    scene.add(new THREE.HemisphereLight(0xdfe6ff, 0x2a2622, 0.85));
+    var sun = new THREE.DirectionalLight(0xfff2df, 0.9);
+    sun.position.set(-40, 70, -20);
+    scene.add(sun);
+    var fill = new THREE.DirectionalLight(0xff7a66, 0.3);
+    fill.position.set(40, 25, 30);
+    scene.add(fill);
+
+    buildTerrain();
+    buildPeaks();
+    buildTrees();
+    buildRocks();
+    buildPlatforms();
+    buildSnow();
+
+    bike = buildBike();
+    bike.scale.setScalar(1.25);
+    scene.add(bike);
+
+    reset();
+    bindEvents();
+    clock = new THREE.Clock();
+    animate();
+  }
+
+  // terrain chunks
+  function makeChunkGeometry() {
+    var geo = new THREE.BufferGeometry();
+    var verts = (NX + 1) * (NZ + 1);
+    var pos = new Float32Array(verts * 3);
+    var uv = new Float32Array(verts * 2);
+    var idx = [];
+    var i = 0;
+    for (var iz = 0; iz <= NZ; iz++) {
+      for (var ix = 0; ix <= NX; ix++) {
+        pos[i * 3] = -CHUNK_W / 2 + (ix / NX) * CHUNK_W;
+        pos[i * 3 + 1] = 0;
+        pos[i * 3 + 2] = (iz / NZ) * CHUNK_LEN;
+        uv[i * 2] = ix / NX;
+        uv[i * 2 + 1] = iz / NZ;
+        i++;
+      }
+    }
+    for (var z2 = 0; z2 < NZ; z2++) {
+      for (var x2 = 0; x2 < NX; x2++) {
+        var a = z2 * (NX + 1) + x2, b = a + 1, c = a + NX + 1, d = c + 1;
+        idx.push(a, c, b, b, c, d);
+      }
+    }
+    geo.setIndex(idx);
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    return geo;
+  }
+
+  function rebuildChunk(chunk, z0) {
+    chunk.z0 = z0;
+    chunk.mesh.position.z = z0;
+    var pos = chunk.mesh.geometry.attributes.position;
+    for (var iz = 0; iz <= NZ; iz++) {
+      for (var ix = 0; ix <= NX; ix++) {
+        var i = iz * (NX + 1) + ix;
+        pos.setY(i, groundHeight(pos.getX(i), pos.getZ(i) + z0));
+      }
+    }
+    pos.needsUpdate = true;
+    var geo = chunk.mesh.geometry;
+    geo.computeVertexNormals();
+    var nrm = geo.attributes.normal;
+    var cols = geo.attributes.color;
+    if (!cols) {
+      cols = new THREE.BufferAttribute(new Float32Array(nrm.count * 3), 3);
+      geo.setAttribute('color', cols);
+    }
+    for (var vi = 0; vi < nrm.count; vi++) {
+      var up = Math.max(0, nrm.getY(vi));
+      var shade = 0.68 + 0.32 * up;
+      cols.setXYZ(vi, shade, shade * 0.99, shade * 0.95);
+    }
+    cols.needsUpdate = true;
+    geo.computeBoundingSphere();
+  }
+
+  function makeGroundTexture() {
+    var c = document.createElement('canvas');
+    c.width = c.height = 512;
+    var g = c.getContext('2d');
+    g.fillStyle = '#d8d1c4';
+    g.fillRect(0, 0, 512, 512);
+    for (var i = 0; i < 150; i++) {
+      var x = Math.random() * 512, y = Math.random() * 512;
+      var r = 20 + Math.random() * 85;
+      var grd = g.createRadialGradient(x, y, 0, x, y, r);
+      var dark = Math.random() < 0.55;
+      grd.addColorStop(0, dark ? 'rgba(112,104,94,0.12)' : 'rgba(255,253,247,0.12)');
+      grd.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = grd;
+      g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+    }
+    for (var j = 0; j < 2400; j++) {
+      var sx = Math.random() * 512, sy = Math.random() * 512;
+      var sr = 0.5 + Math.random() * 1.7;
+      g.fillStyle = 'rgba(84,78,70,' + (0.05 + Math.random() * 0.13) + ')';
+      for (var ox = -512; ox <= 512; ox += 512) {
+        for (var oy = -512; oy <= 512; oy += 512) {
+          g.beginPath(); g.arc(sx + ox, sy + oy, sr, 0, Math.PI * 2); g.fill();
+        }
+      }
+    }
+    var tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(6, 3);
+    tex.anisotropy = 4;
+    tex.encoding = THREE.sRGBEncoding;
+    return tex;
+  }
+
+  function buildTerrain() {
+    var groundMap = makeGroundTexture();
+    var mat = new THREE.MeshStandardMaterial({
+      map: groundMap,
+      bumpMap: groundMap,
+      bumpScale: 0.35,
+      roughness: 0.92,
+      metalness: 0.0,
+      vertexColors: true,
+      color: 0xece6d9
+    });
+    for (var i = 0; i < N_CHUNKS; i++) {
+      var mesh = new THREE.Mesh(makeChunkGeometry(), mat);
+      mesh.frustumCulled = false;
+      scene.add(mesh);
+      var chunk = { mesh: mesh, z0: 0 };
+      rebuildChunk(chunk, i * CHUNK_LEN);
+      chunks.push(chunk);
+    }
+  }
+
+  function recycleChunks() {
+    var maxZ = 0;
+    for (var i = 0; i < chunks.length; i++) maxZ = Math.max(maxZ, chunks[i].z0);
+    for (var j = 0; j < chunks.length; j++) {
+      if (chunks[j].z0 + CHUNK_LEN < state.z - 60) {
+        maxZ += CHUNK_LEN;
+        rebuildChunk(chunks[j], maxZ);
+      }
+    }
+  }
+
+  // scenery
+  function buildPeaks() {
+    var mat = new THREE.MeshStandardMaterial({ color: 0x2b2622, roughness: 1, flatShading: true });
+    for (var i = 0; i < 10; i++) {
+      var h = 70 + Math.random() * 120;
+      var m = new THREE.Mesh(new THREE.ConeGeometry(50 + Math.random() * 70, h, 5), mat);
+      var side = Math.random() < 0.5 ? -1 : 1;
+      m.position.x = side * (150 + Math.random() * 220);
+      m.userData.z = 100 + Math.random() * 700;
+      m.position.z = m.userData.z;
+      m.position.y = groundHeight(m.position.x, m.position.z) + h * 0.35;
+      scene.add(m);
+      peaks.push(m);
+    }
+  }
+
+  function buildTrees() {
+    var trunkGeo = new THREE.CylinderGeometry(0.12, 0.16, 1.2, 5);
+    var coneGeo1 = new THREE.ConeGeometry(1.25, 2.6, 6);
+    var coneGeo2 = new THREE.ConeGeometry(0.9, 2.0, 6);
+    var capGeo = new THREE.ConeGeometry(0.55, 0.8, 6);
+    var trunkMat = new THREE.MeshStandardMaterial({ color: 0x3a2c22, roughness: 1 });
+    var pineMat = new THREE.MeshStandardMaterial({ color: 0x27402f, roughness: 0.95, flatShading: true });
+    var snowMat = new THREE.MeshStandardMaterial({ color: 0xf2ede3, roughness: 0.9 });
+    for (var i = 0; i < 90; i++) {
+      var t = new THREE.Group();
+      var trunk = new THREE.Mesh(trunkGeo, trunkMat); trunk.position.y = 0.6; t.add(trunk);
+      var c1 = new THREE.Mesh(coneGeo1, pineMat); c1.position.y = 2.3; t.add(c1);
+      var c2 = new THREE.Mesh(coneGeo2, pineMat); c2.position.y = 3.6; t.add(c2);
+      var cap = new THREE.Mesh(capGeo, snowMat); cap.position.y = 3.1; t.add(cap);
+      var s = 0.7 + Math.random() * 1.1;
+      t.scale.set(s, s, s);
+      var side = Math.random() < 0.5 ? -1 : 1;
+      t.position.x = side * (6 + Math.random() * 46);
+      t.userData.z = 30 + Math.random() * 560;
+      scene.add(t);
+      trees.push(t);
+    }
+  }
+
+  function buildRocks() {
+    var geo = new THREE.IcosahedronGeometry(0.8, 0);
+    var mat = new THREE.MeshStandardMaterial({ color: 0x4a4a4a, roughness: 1, flatShading: true });
+    for (var i = 0; i < 55; i++) {
+      var r = new THREE.Mesh(geo, mat);
+      var s = 0.5 + Math.random() * 1.6;
+      r.scale.set(s, s * 0.75, s);
+      var side = Math.random() < 0.5 ? -1 : 1;
+      r.position.x = side * (6 + Math.random() * 44);
+      r.userData.z = 30 + Math.random() * 560;
+      scene.add(r);
+      rocks.push(r);
+    }
+  }
+
+  function nextDropZ(fromZ) {
+    var s = Math.floor(fromZ / 110);
+    for (var i = 0; i < 30; i++) {
+      s++;
+      if (s % 7 === 3) return s * 110 + 40;
+    }
+    return fromZ + 800;
+  }
+
+  function buildPlatforms() {
+    var wood = new THREE.MeshStandardMaterial({ color: 0x6b4a2f, roughness: 0.9 });
+    var dark = new THREE.MeshStandardMaterial({ color: 0x4a3120, roughness: 0.95 });
+    var nz = 30;
+    for (var i = 0; i < 5; i++) {
+      nz = nextDropZ(nz + 60);
+      var g = new THREE.Group();
+      var deck = new THREE.Mesh(new THREE.BoxGeometry(9, 0.22, 7), wood);
+      deck.position.y = 0;
+      g.add(deck);
+      for (var px = -1; px <= 1; px += 2) {
+        for (var pz = -1; pz <= 1; pz += 2) {
+          var post = new THREE.Mesh(new THREE.BoxGeometry(0.28, 3.4, 0.28), dark);
+          post.position.set(px * 3.9, -1.75, pz * 3.0);
+          g.add(post);
+        }
+      }
+      var railL = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.5, 7), dark);
+      railL.position.set(-4.4, 0.35, 0);
+      g.add(railL);
+      var railR = railL.clone(); railR.position.x = 4.4; g.add(railR);
+      g.userData.z = nz;
+      scene.add(g);
+      platforms.push(g);
+    }
+  }
+
+  function buildSnow() {
+    var count = 700;
+    var pos = new Float32Array(count * 3);
+    for (var i = 0; i < count; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 100;
+      pos[i * 3 + 1] = Math.random() * 45;
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 100;
+    }
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    var mat = new THREE.PointsMaterial({ color: 0xf2ede3, size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0.6, depthWrite: false });
+    snow = new THREE.Points(geo, mat);
+    snow.frustumCulled = false;
+    scene.add(snow);
+  }
+
+  // full-suspension bike
+  function tube(a, b, r, mat) {
+    var dir = new THREE.Vector3().subVectors(b, a);
+    var len = dir.length();
+    var mesh = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 6), mat);
+    mesh.position.copy(a).add(b).multiplyScalar(0.5);
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+    return mesh;
+  }
+
+  function makeWheel(black, metal) {
+    var hub = new THREE.Group();
+    var ring = new THREE.Mesh(new THREE.TorusGeometry(0.44, 0.085, 8, 24), black);
+    ring.rotation.y = Math.PI / 2;
+    hub.add(ring);
+    var disc = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.06, 10), metal);
+    disc.rotation.z = Math.PI / 2;
+    hub.add(disc);
+    for (var i = 0; i < 6; i++) {
+      var spoke = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.82, 0.02), metal);
+      spoke.rotation.x = (i / 6) * Math.PI;
+      hub.add(spoke);
+    }
+    return hub;
+  }
+
+  function buildBike() {
+    var g = new THREE.Group();
+    var red = new THREE.MeshStandardMaterial({ color: 0xe53935, roughness: 0.45, metalness: 0.25 });
+    var black = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.8 });
+    var metal = new THREE.MeshStandardMaterial({ color: 0x9a958d, roughness: 0.3, metalness: 0.8 });
+    var yellow = new THREE.MeshStandardMaterial({ color: 0xd7ef1f, roughness: 0.6 });
+    var skin = new THREE.MeshStandardMaterial({ color: 0xc9a188, roughness: 0.8 });
+    var spring = new THREE.MeshStandardMaterial({ color: 0xc0392b, roughness: 0.5, metalness: 0.4 });
+
+    var rearHub = new THREE.Vector3(0, 0.46, -0.74);
+    var bb = new THREE.Vector3(0, 0.42, -0.02);
+    var seat = new THREE.Vector3(0, 0.98, -0.3);
+    var head = new THREE.Vector3(0, 1.0, 0.5);
+
+    g.add(tube(rearHub, bb, 0.035, red));
+    g.add(tube(bb, seat, 0.05, red));
+    g.add(tube(seat, head, 0.045, red));
+    g.add(tube(head, bb, 0.05, red));
+    g.add(tube(new THREE.Vector3(-0.05, 0.45, -0.05), new THREE.Vector3(-0.05, 0.9, -0.3), 0.03, red));
+    g.add(tube(new THREE.Vector3(0.05, 0.45, -0.05), new THREE.Vector3(0.05, 0.9, -0.3), 0.03, red));
+
+    // rear swingarm + shock
+    g.add(tube(rearHub, new THREE.Vector3(0, 0.5, -0.18), 0.04, red));
+    g.add(tube(new THREE.Vector3(0.09, 0.46, -0.74), new THREE.Vector3(0.09, 0.52, -0.18), 0.03, red));
+    g.add(tube(new THREE.Vector3(-0.09, 0.46, -0.74), new THREE.Vector3(-0.09, 0.52, -0.18), 0.03, red));
+    var shockTop = new THREE.Vector3(0, 0.88, -0.26);
+    var shockBottom = new THREE.Vector3(0, 0.58, -0.5);
+    g.add(tube(shockTop, shockBottom, 0.045, metal));
+    for (var c = 0; c < 6; c++) {
+      var t0 = c / 6, t1 = (c + 0.55) / 6;
+      var pa = new THREE.Vector3().lerpVectors(shockTop, shockBottom, t0);
+      var pb = new THREE.Vector3().lerpVectors(shockTop, shockBottom, t1);
+      var coil = new THREE.Mesh(new THREE.TorusGeometry(0.055, 0.014, 5, 10), spring);
+      coil.position.copy(pa).add(pb).multiplyScalar(0.5);
+      coil.lookAt(shockBottom);
+      g.add(coil);
+    }
+    g.add(tube(new THREE.Vector3(0, 0.78, -0.2), new THREE.Vector3(0, 0.58, -0.5), 0.025, metal));
+
+    // front suspension (steer group)
+    frontSteer = new THREE.Group();
+    frontSteer.position.copy(head);
+    var crown = new THREE.Vector3(0, 0.12, 0.03);
+    var lowerL = new THREE.Vector3(-0.1, -0.5, 0.24);
+    var lowerR = new THREE.Vector3(0.1, -0.5, 0.24);
+    frontSteer.add(tube(new THREE.Vector3(0, 0, 0), crown, 0.05, metal));
+    frontSteer.add(tube(crown, lowerL, 0.035, metal));
+    frontSteer.add(tube(crown, lowerR, 0.035, metal));
+    frontSteer.add(tube(new THREE.Vector3(-0.1, -0.3, 0.14), lowerL, 0.05, black));
+    frontSteer.add(tube(new THREE.Vector3(0.1, -0.3, 0.14), lowerR, 0.05, black));
+    var bar = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.62, 6), black);
+    bar.rotation.z = Math.PI / 2;
+    bar.position.set(0, 0.18, 0.06);
+    frontSteer.add(bar);
+    var fw = makeWheel(black, metal);
+    fw.position.set(0, -0.54, 0.28);
+    frontSteer.add(fw);
+    wheels.push(fw);
+    g.add(frontSteer);
+
+    var rw = makeWheel(black, metal);
+    rw.position.copy(rearHub);
+    g.add(rw);
+    wheels.push(rw);
+
+    // rider
+    var hips = new THREE.Vector3(0, 1.12, -0.26);
+    var shoulders = new THREE.Vector3(0, 1.5, 0.12);
+    g.add(tube(hips, shoulders, 0.17, yellow));
+    var headM = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 10), skin);
+    headM.position.set(0, 1.7, 0.22);
+    g.add(headM);
+    var helmet = new THREE.Mesh(new THREE.SphereGeometry(0.175, 12, 10), black);
+    helmet.position.set(0, 1.74, 0.2);
+    helmet.scale.set(1, 0.9, 1.15);
+    g.add(helmet);
+    var goggle = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.08, 0.06), metal);
+    goggle.position.set(0, 1.72, 0.35);
+    g.add(goggle);
+    g.add(tube(shoulders, new THREE.Vector3(-0.26, 1.2, 0.52), 0.05, yellow));
+    g.add(tube(shoulders, new THREE.Vector3(0.26, 1.2, 0.52), 0.05, yellow));
+    g.add(tube(hips, new THREE.Vector3(-0.16, 0.72, 0.02), 0.07, black));
+    g.add(tube(hips, new THREE.Vector3(0.16, 0.72, 0.02), 0.07, black));
+    g.add(tube(new THREE.Vector3(-0.16, 0.72, 0.02), new THREE.Vector3(-0.14, 0.46, 0.02), 0.06, black));
+    g.add(tube(new THREE.Vector3(0.16, 0.72, 0.02), new THREE.Vector3(0.14, 0.46, 0.02), 0.06, black));
+
+    var saddle = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.05, 0.28), black);
+    saddle.position.set(0, 1.02, -0.32);
+    g.add(saddle);
+
+    shadow = new THREE.Mesh(new THREE.CircleGeometry(0.95, 20), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.3, depthWrite: false }));
+    shadow.rotation.x = -Math.PI / 2;
+    scene.add(shadow);
+
+    return g;
+  }
+
+  function reset() {
+    state = {
+      x: 0, z: 0, y: groundHeight(0, 0),
+      speed: 7, vy: 0,
+      heading: 0, steerAngle: 0,
+      grounded: true, started: false, crashed: false, dist: 0, pitch: 0, launchCd: 0, flips: 0, flipAccum: 0
+    };
+    keys.left = keys.right = keys.pedal = keys.jump = keys.q = keys.e = false;
+    flipsEl.textContent = '0';
+    if (bike) {
+      bike.position.set(0, state.y, 0);
+      bike.rotation.set(0, 0, 0);
+      frontSteer.rotation.y = 0;
+    }
+    if (shadow) shadow.position.set(0, state.y + 0.02, 0);
+    if (camera) {
+      camera.position.set(1.6, state.y + 4.8, -8.5);
+      camera.lookAt(new THREE.Vector3(0, state.y + 1.2, 8));
+    }
+  }
+
+  function start() {
+    reset();
+    paused = false;
+    pauseOverlay.classList.add('hidden');
+    state.started = true;
+    startOverlay.classList.add('hidden');
+    crashOverlay.classList.add('hidden');
+  }
+
+  function crash() {
+    state.crashed = true;
+    state.started = false;
+    var run = Math.round(state.dist);
+    if (run > best) {
+      best = run;
+      localStorage.setItem(BEST_KEY, String(best));
+      bestEl.innerHTML = best + '<small>M</small>';
+    }
+    runDistanceEl.textContent = run;
+    bestLineEl.textContent = 'Personal best ' + best + ' m';
+    crashOverlay.classList.remove('hidden');
+  }
+
+  function norm(a) {
+    while (a > Math.PI) a -= Math.PI * 2;
+    while (a < -Math.PI) a += Math.PI * 2;
+    return a;
+  }
+
+  function update(dt) {
+    if (!state.started) return;
+    state.launchCd = Math.max(0, state.launchCd - dt);
+
+    var fx = Math.sin(state.heading);
+    var fz = Math.cos(state.heading);
+    var slope = slopeAt(state.x, state.z, fx, fz);
+
+    if (state.grounded) {
+      if (keys.pedal) state.speed += 9 * dt;
+      else state.speed -= 2.2 * dt;
+      state.speed += Math.max(0, -slope) * 8 * dt;
+      state.speed = Math.max(4, Math.min(32, state.speed));
+
+      var steerIn = (keys.left ? 1 : 0) - (keys.right ? 1 : 0);
+      state.steerAngle += (steerIn * 0.42 - state.steerAngle) * Math.min(1, dt * 8);
+      state.heading += state.steerAngle * (0.35 + state.speed * 0.045) * dt;
+
+      state.x += Math.sin(state.heading) * state.speed * dt;
+      state.z += Math.cos(state.heading) * state.speed * dt;
+      state.x = Math.max(-60, Math.min(60, state.x));
+      var gy = groundHeight(state.x, state.z);
+      if (gy < state.y - 1.2) {
+        // rode off a drop platform
+        state.grounded = false;
+        state.vy = 0;
+      } else {
+        state.y = gy;
+      }
+
+      var actualSlope = slopeAt(state.x, state.z, Math.sin(state.heading), Math.cos(state.heading));
+      state.pitch += (-Math.atan(actualSlope) - state.pitch) * Math.min(1, dt * 10);
+
+      wheels[0].rotation.x += (state.speed / 0.44) * dt;
+      wheels[1].rotation.x += (state.speed / 0.44) * dt;
+
+      if (state.grounded && state.speed > 9 && actualSlope < -0.62 && state.launchCd <= 0) {
+        state.grounded = false;
+        state.vy = 2 + state.speed * 0.5;
+        state.launchCd = 1.4;
+      }
+
+      if (keys.jump) {
+        keys.jump = false;
+        state.vy = 6.2;
+        state.grounded = false;
+      }
+    } else {
+      state.vy -= 16 * dt;
+      state.x += Math.sin(state.heading) * state.speed * dt;
+      state.z += Math.cos(state.heading) * state.speed * dt;
+      state.y += state.vy * dt;
+      // Q = front flip, E = back flip. Full 360 rotations are allowed.
+      var pitchIn = (keys.q ? 1 : 0) - (keys.e ? 1 : 0);
+      if (pitchIn) {
+        var spin = pitchIn * 4.8 * dt;
+        state.pitch += spin;
+        state.flipAccum += spin;
+        if (Math.abs(state.flipAccum) >= Math.PI * 2) {
+          state.flips++;
+          state.flipAccum -= Math.sign(state.flipAccum) * Math.PI * 2;
+          flipsEl.textContent = state.flips;
+        }
+      }
+      state.steerAngle += ((keys.left ? 1 : 0) - (keys.right ? 1 : 0)) * 0.2 * dt;
+      // small lateral corrections with A / D while airborne
+      state.x += ((keys.left ? 1 : 0) - (keys.right ? 1 : 0)) * 3.2 * dt;
+      state.x = Math.max(-60, Math.min(60, state.x));
+
+      var gy = groundHeight(state.x, state.z);
+      if (state.y <= gy) {
+        var landSlope = slopeAt(state.x, state.z, Math.sin(state.heading), Math.cos(state.heading));
+        var landPitch = -Math.atan(landSlope);
+        var diff = Math.abs(norm(state.pitch - landPitch));
+        if (diff > 2.4) {
+          state.y = gy;
+          crash();
+        } else {
+          state.y = gy;
+          state.vy = 0;
+          state.grounded = true;
+          state.pitch = landPitch;
+          keys.jump = false;
+        }
+      }
+    }
+
+    state.dist = state.z;
+    flipsEl.textContent = state.flips;
+
+    bike.position.set(state.x, state.y, state.z);
+    bike.rotation.y = state.heading;
+    bike.rotation.x = state.pitch;
+    bike.rotation.z = -state.steerAngle * 0.12;
+    frontSteer.rotation.y = state.steerAngle;
+
+    shadow.position.set(state.x, groundHeight(state.x, state.z) + 0.02, state.z);
+    shadow.material.opacity = Math.max(0.05, 0.3 - Math.max(0, state.y - groundHeight(state.x, state.z)) * 0.05);
+
+    var backX = -Math.sin(state.heading), backZ = -Math.cos(state.heading);
+    var rightX = Math.cos(state.heading), rightZ = -Math.sin(state.heading);
+    var targetPos = new THREE.Vector3(
+      state.x + backX * 7.0 + rightX * 2.6,
+      state.y + 4.0,
+      state.z + backZ * 7.0 + rightZ * 2.6
+    );
+    var minY = groundHeight(targetPos.x, targetPos.z) + 2.2;
+    if (targetPos.y < minY) targetPos.y = minY;
+    var lookAt = new THREE.Vector3(
+      state.x + Math.sin(state.heading) * 8,
+      state.y + 1.2,
+      state.z + Math.cos(state.heading) * 8
+    );
+    camera.position.lerp(targetPos, 1 - Math.exp(-dt * 5));
+    camera.lookAt(lookAt);
+
+    recycleChunks();
+
+    for (var i = 0; i < trees.length; i++) {
+      var t = trees[i];
+      if (t.userData.z < state.z - 50) {
+        t.userData.z += 560;
+        t.position.x = (Math.random() < 0.5 ? -1 : 1) * (6 + Math.random() * 46);
+        t.scale.setScalar(0.7 + Math.random() * 1.1);
+      }
+      t.position.z = t.userData.z;
+      t.position.y = groundHeight(t.position.x, t.position.z);
+    }
+    for (var j = 0; j < rocks.length; j++) {
+      var r = rocks[j];
+      if (r.userData.z < state.z - 50) {
+        r.userData.z += 560;
+        r.position.x = (Math.random() < 0.5 ? -1 : 1) * (6 + Math.random() * 44);
+      }
+      r.position.z = r.userData.z;
+      r.position.y = groundHeight(r.position.x, r.position.z) + 0.2;
+    }
+    for (var pf = 0; pf < platforms.length; pf++) {
+      var pl = platforms[pf];
+      if (pl.userData.z < state.z - 40) {
+        pl.userData.z = nextDropZ(state.z + 260 + pf * 200);
+      }
+      var pz = pl.userData.z + 3;
+      pl.position.set(0, groundHeight(0, pz) + 0.05, pz);
+    }
+    for (var p = 0; p < peaks.length; p++) {
+      var pk = peaks[p];
+      if (pk.userData.z < state.z - 150) {
+        pk.userData.z += 900;
+        pk.position.x = (Math.random() < 0.5 ? -1 : 1) * (150 + Math.random() * 220);
+        pk.position.y = groundHeight(pk.position.x, pk.userData.z) + 40;
+      }
+      pk.position.z = pk.userData.z;
+    }
+
+    snow.position.set(camera.position.x, camera.position.y - 8, camera.position.z);
+    var sp = snow.geometry.attributes.position;
+    for (var s = 0; s < sp.count; s++) {
+      var yy = sp.getY(s) - dt * 2.2;
+      if (yy < 0) yy = 45;
+      sp.setY(s, yy);
+    }
+    sp.needsUpdate = true;
+
+    speedEl.innerHTML = Math.round(state.speed * 3.6) + '<small>KM/H</small>';
+    distEl.innerHTML = Math.round(state.dist) + '<small>M</small>';
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    var dt = Math.min(0.05, clock.getDelta());
+    if (!paused) update(dt);
+    renderer.render(scene, camera);
+  }
+
+  function bindEvents() {
+    window.addEventListener('keydown', function (e) {
+      if (e.code === 'KeyW' || e.code === 'ArrowUp') { e.preventDefault(); keys.pedal = true; }
+      else if (e.code === 'KeyA' || e.code === 'ArrowLeft') { e.preventDefault(); keys.left = true; }
+      else if (e.code === 'KeyD' || e.code === 'ArrowRight') { e.preventDefault(); keys.right = true; }
+      else if (e.code === 'KeyQ') { e.preventDefault(); keys.q = true; }
+      else if (e.code === 'KeyE') { e.preventDefault(); keys.e = true; }
+      else if (e.code === 'Space') {
+        e.preventDefault();
+        if (!state.started && !state.crashed) start(); else keys.jump = true;
+      } else if (e.code === 'KeyR') { start(); }
+    });
+    window.addEventListener('keyup', function (e) {
+      if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.pedal = false;
+      if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = false;
+      if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = false;
+      if (e.code === 'KeyQ') keys.q = false;
+      if (e.code === 'KeyE') keys.e = false;
+    });
+
+    document.getElementById('startBtn').addEventListener('click', start);
+    document.getElementById('restartBtn').addEventListener('click', start);
+    window.addEventListener('keydown', function (e) {
+      if (e.code !== 'Escape' || e.repeat) return;
+      if (!state.started || state.crashed) return;
+      paused = !paused;
+      pauseOverlay.classList.toggle('hidden', !paused);
+    });
+    document.getElementById('resumeBtn').addEventListener('click', function () {
+      paused = false;
+      pauseOverlay.classList.add('hidden');
+    });
+
+    var btns = document.querySelectorAll('.touch button');
+    Array.prototype.forEach.call(btns, function (btn) {
+      var key = btn.getAttribute('data-key');
+      function down(e) {
+        e.preventDefault();
+        if (!state.started) { start(); return; }
+        if (key === 'jump') keys.jump = true;
+        if (key === 'left') keys.left = true;
+        if (key === 'right') keys.right = true;
+        if (key === 'pedal') keys.pedal = true;
+      }
+      function up(e) {
+        e.preventDefault();
+        if (key === 'left') keys.left = false;
+        if (key === 'right') keys.right = false;
+        if (key === 'pedal') keys.pedal = false;
+      }
+      btn.addEventListener('pointerdown', down);
+      btn.addEventListener('pointerup', up);
+      btn.addEventListener('pointercancel', up);
+      btn.addEventListener('pointerleave', up);
+    });
+
+    window.addEventListener('resize', function () {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  }
+
+  window.game3d = { get state() { return state; }, ground: groundHeight };
+  init();
+})();
+</script>
+</body>
+</html>

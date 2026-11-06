@@ -914,6 +914,62 @@ html.hero-motion-ready .page-home .hero-wheel {
   z-index: 2;
 }
 
+.page-mtb .mtb-play-btn {
+  position: absolute;
+  left: 88px;
+  top: 620px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px;
+  background: #E53935;
+  color: #F4F1EC;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  border-radius: 4px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.page-mtb .mtb-play-2d {
+  position: absolute;
+  left: 300px;
+  top: 620px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 18px;
+  border: 1px solid rgba(244, 241, 236, 0.35);
+  background: rgba(23, 23, 23, 0.55);
+  backdrop-filter: blur(6px);
+  color: #F4F1EC;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.page-mtb .mtb-play-2d:hover {
+  border-color: #E53935;
+  color: #E53935;
+}
+
+.page-mtb .mtb-play-btn:hover {
+  background: #F4F1EC;
+  color: #E53935;
+  transform: translateY(-2px);
+}
+
+.page-mtb .mtb-play-btn .play-tri {
+  font-size: 10px;
+  line-height: 1;
+}
+
 .page-mtb .mtb-hero-img {
   position: absolute;
   left: 64px;
@@ -1817,6 +1873,57 @@ html.hero-motion-ready .page-home .hero-wheel {
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.12em;
+}
+
+.end-col a.end-email {
+  display: inline-block;
+  margin-top: 20px;
+  color: #F4F1EC;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(229, 57, 53, 0.6);
+  padding-bottom: 3px;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.end-col a.end-email:hover {
+  color: #E53935;
+  border-color: #E53935;
+}
+
+.end-email-hint {
+  margin-top: 8px;
+  color: #7E7A74;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.copy-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2000;
+  padding: 12px 18px;
+  background: #E53935;
+  color: #F4F1EC;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  border-radius: 3px;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.copy-toast.show {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Scrolling text ribbon */

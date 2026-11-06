@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>DESCEND / MTB MINI GAME</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Jim+Nightshade&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: #171717;
+    color: #F4F1EC;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+  }
+  canvas { display: block; width: 100vw; height: 100vh; }
+
+  .back-link {
+    position: fixed;
+    left: 28px; top: 24px;
+    z-index: 20;
+    color: #B8B4AE;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-decoration: none;
+    padding: 10px 14px;
+    border: 1px solid rgba(184,180,174,.25);
+    border-radius: 3px;
+    background: rgba(23,23,23,.55);
+    backdrop-filter: blur(6px);
+    transition: color .2s, border-color .2s;
+  }
+  .back-link:hover { color: #fff; border-color: #E53935; }
+
+  .hud {
+    position: fixed;
+    right: 28px; top: 24px;
+    z-index: 20;
+    display: flex;
+    gap: 28px;
+    text-align: right;
+    pointer-events: none;
+  }
+  .hud .stat-label {
+    display: block;
+    color: #7E7A74;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    margin-bottom: 4px;
+  }
+  .hud .stat-value {
+    color: #F4F1EC;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .hud .stat-value small { font-size: 11px; font-weight: 600; color: #B8B4AE; margin-left: 3px; }
+  .hud .stat-value.speed { color: #E53935; }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: radial-gradient(circle at 50% 40%, rgba(23,23,23,.55) 0%, rgba(10,10,10,.88) 70%);
+    transition: opacity .25s ease;
+  }
+  .overlay.hidden { opacity: 0; pointer-events: none; }
+
+  .panel { max-width: 560px; text-align: center; }
+  .eyebrow {
+    color: #B8B4AE;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .24em;
+    margin-bottom: 18px;
+  }
+  .title {
+    font-family: 'Jim Nightshade', cursive;
+    font-weight: 400;
+    font-size: clamp(56px, 9vw, 96px);
+    line-height: .95;
+    color: #E53935;
+    margin-bottom: 18px;
+  }
+  .subtitle {
+    color: #B8B4AE;
+    font-size: 13px;
+    line-height: 1.7;
+    letter-spacing: .02em;
+    margin-bottom: 26px;
+  }
+  .keys {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+    color: #8f8a83;
+    font-size: 11px;
+    letter-spacing: .06em;
+  }
+  .keys b { color: #F4F1EC; font-weight: 700; }
+  .play {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 30px;
+    background: #E53935;
+    color: #F4F1EC;
+    border: 0;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .16em;
+    cursor: pointer;
+    transition: background .2s, color .2s, transform .2s;
+  }
+  .play:hover { background: #F4F1EC; color: #E53935; transform: translateY(-2px); }
+  .play .tri { font-size: 9px; }
+
+  .result {
+    color: #F4F1EC;
+    font-size: 15px;
+    margin-bottom: 22px;
+    letter-spacing: .04em;
+  }
+  .result b { color: #E53935; font-size: 22px; }
+  .result .best { color: #B8B4AE; font-size: 12px; display: block; margin-top: 8px; }
+
+  .touch {
+    position: fixed;
+    left: 0; right: 0; bottom: 22px;
+    z-index: 25;
+    display: none;
+    justify-content: space-between;
+    padding: 0 22px;
+    pointer-events: none;
+  }
+  .touch button {
+    pointer-events: auto;
+    width: 76px; height: 76px;
+    border-radius: 50%;
+    border: 1px solid rgba(244,241,236,.3);
+    background: rgba(23,23,23,.6);
+    backdrop-filter: blur(6px);
+    color: #F4F1EC;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    touch-action: none;
+    user-select: none;
+  }
+  .touch .jump { border-color: #E53935; color: #E53935; }
+  .touch .left, .touch .right { width: 64px; height: 64px; align-self: flex-end; }
+  .touch .pad { display: flex; gap: 12px; }
+  @media (hover: none) and (pointer: coarse) {
+    .touch { display: flex; }
+    .hud { right: 18px; top: 18px; gap: 18px; }
+    .back-link { left: 16px; top: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<a class="back-link" href="index.html#mtb">&larr; BACK TO MTB</a>
+
+<div class="hud">
+  <div>
+    <span class="stat-label">SPEED</span>
+    <span class="stat-value speed" id="speed">0<small>KM/H</small></span>
+  </div>
+  <div>
+    <span class="stat-label">DISTANCE</span>
+    <span class="stat-value" id="distance">0<small>M</small></span>
+  </div>
+  <div>
+    <span class="stat-label">BEST</span>
+    <span class="stat-value" id="best">0<small>M</small></span>
+  </div>
+</div>
+
+<div class="overlay" id="startOverlay">
+  <div class="panel">
+    <div class="eyebrow">DYLAN / MINI GAME / LOW-POLY</div>
+    <h1 class="title">DESCEND.</h1>
+    <p class="subtitle">Keep your speed down the mountain. Jump, adjust your pitch in the air, and land cleanly or you crash.</p>
+    <div class="keys">
+      <span><b>SPACE / ↑</b> Jump</span>
+      <span><b>← →</b> Air control</span>
+      <span><b>R</b> Restart</span>
+    </div>
+    <button class="play" id="startBtn"><span class="tri">▶</span> RIDE</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="crashOverlay">
+  <div class="panel">
+    <div class="eyebrow">RUN ENDED</div>
+    <h1 class="title">WIPEOUT.</h1>
+    <p class="result">Distance <b id="runDistance">0</b> m<span class="best" id="bestLine"></span></p>
+    <button class="play" id="restartBtn"><span class="tri">▶</span> RIDE AGAIN</button>
+  </div>
+</div>
+
+<div class="touch">
+  <div class="pad">
+    <button class="left" data-key="left">LEAN</button>
+    <button class="right" data-key="right">LEAN</button>
+  </div>
+  <button class="jump" data-key="jump">JUMP</button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+  var speedEl = document.getElementById('speed');
+  var distEl = document.getElementById('distance');
+  var bestEl = document.getElementById('best');
+  var startOverlay = document.getElementById('startOverlay');
+  var crashOverlay = document.getElementById('crashOverlay');
+  var runDistanceEl = document.getElementById('runDistance');
+  var bestLineEl = document.getElementById('bestLine');
+
+  var W = 0, H = 0, DPR = 1;
+  var BEST_KEY = 'dylan-mtb-best';
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---------- terrain ----------
+  var BASE_SLOPE = 0.30;
+  function terrainY(x) {
+    return 240 + x * BASE_SLOPE
+      + 70 * Math.sin(x / 420)
+      + 28 * Math.sin(x / 155 + 1.3)
+      + 12 * Math.sin(x / 57 + 0.4);
+  }
+  function terrainSlope(x) {
+    var d = 3;
+    return (terrainY(x + d) - terrainY(x - d)) / (2 * d);
+  }
+
+  // ---------- state ----------
+  var state, cam, input, particles, lastTime, best, dustTimer;
+  best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0;
+  bestEl.innerHTML = Math.round(best) + '<small>M</small>';
+
+  function reset() {
+    state = {
+      x: 240,
+      y: terrainY(240),
+      v: 260,
+      vy: 0,
+      rot: Math.atan(terrainSlope(240)),
+      grounded: true,
+      started: false,
+      crashed: false,
+      distance: 0
+    };
+    cam = { x: state.x - W * 0.30, y: state.y - H * 0.55 };
+    particles = [];
+    dustTimer = 0;
+    input = { jump: false, left: false, right: false };
+  }
+  reset();
+
+  function start() {
+    reset();
+    state.started = true;
+    startOverlay.classList.add('hidden');
+    crashOverlay.classList.add('hidden');
+  }
+
+  function crash() {
+    state.crashed = true;
+    state.started = false;
+    var run = Math.round(state.distance);
+    if (run > best) {
+      best = run;
+      localStorage.setItem(BEST_KEY, String(best));
+      bestEl.innerHTML = Math.round(best) + '<small>M</small>';
+    }
+    runDistanceEl.textContent = run;
+    bestLineEl.textContent = 'Personal best ' + Math.round(best) + ' m';
+    crashOverlay.classList.remove('hidden');
+  }
+
+  function spawnDust() {
+    for (var i = 0; i < 10; i++) {
+      particles.push({
+        x: state.x + (Math.random() - 0.5) * 30,
+        y: state.y + 8,
+        vx: -state.v * 0.18 - Math.random() * 60,
+        vy: -Math.random() * 110,
+        life: 0.55 + Math.random() * 0.3,
+        max: 0.85,
+        r: 2 + Math.random() * 4
+      });
+    }
+  }
+
+  function update(dt) {
+    if (!state.started) return;
+
+    var slope = terrainSlope(state.x);
+    var theta = Math.atan(slope);
+
+    if (state.grounded) {
+      state.v += (Math.sin(theta) * 620 - state.v * 0.22) * dt;
+      state.v = Math.max(150, Math.min(980, state.v));
+      state.x += state.v * dt;
+      state.y = terrainY(state.x);
+      state.rot = Math.atan(terrainSlope(state.x));
+
+      if (input.jump) {
+        input.jump = false;
+        state.vy = -640;
+        state.grounded = false;
+      }
+    } else {
+      state.v += Math.sin(theta) * 90 * dt;
+      state.vy += 1450 * dt;
+      state.x += state.v * dt;
+      state.y += state.vy * dt;
+
+      if (input.left) state.rot -= 2.8 * dt;
+      if (input.right) state.rot += 2.8 * dt;
+
+      var ground = terrainY(state.x);
+      if (state.y >= ground) {
+        var diff = Math.abs(normalizeAngle(state.rot - Math.atan(terrainSlope(state.x))));
+        if (diff > 0.62 || state.vy > 1350) {
+          state.y = ground;
+          crash();
+        } else {
+          state.y = ground;
+          state.vy = 0;
+          state.grounded = true;
+          state.rot = Math.atan(terrainSlope(state.x));
+          spawnDust();
+        }
+      }
+    }
+
+    state.distance = state.x / 40;
+
+    dustTimer += dt;
+    if (state.grounded && state.v > 260 && dustTimer > 0.07) {
+      dustTimer = 0;
+      particles.push({
+        x: state.x - 26,
+        y: state.y + 6,
+        vx: -state.v * 0.22 - Math.random() * 40,
+        vy: -Math.random() * 60,
+        life: 0.35 + Math.random() * 0.2,
+        max: 0.55,
+        r: 1.5 + Math.random() * 2.5
+      });
+    }
+
+    var targetX = state.x - W * 0.30;
+    var targetY = state.y - H * 0.55;
+    var k = Math.min(1, dt * 6);
+    cam.x += (targetX - cam.x) * k;
+    cam.y += (targetY - cam.y) * k;
+
+    for (var i = particles.length - 1; i >= 0; i--) {
+      var p = particles[i];
+      p.life -= dt;
+      if (p.life <= 0) { particles.splice(i, 1); continue; }
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 260 * dt;
+    }
+
+    speedEl.innerHTML = Math.round(state.v * 0.18) + '<small>KM/H</small>';
+    distEl.innerHTML = Math.round(state.distance) + '<small>M</small>';
+  }
+
+  function normalizeAngle(a) {
+    while (a > Math.PI) a -= Math.PI * 2;
+    while (a < -Math.PI) a += Math.PI * 2;
+    return a;
+  }
+
+  // ---------- render ----------
+  function drawBackground() {
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#1b1b1b');
+    g.addColorStop(0.55, '#151515');
+    g.addColorStop(1, '#0e0e0e');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // a soft red glow behind the rider
+    var glow = ctx.createRadialGradient(W * 0.5, H * 0.42, 40, W * 0.5, H * 0.42, Math.max(W, H) * 0.55);
+    glow.addColorStop(0, 'rgba(229,57,53,0.10)');
+    glow.addColorStop(1, 'rgba(229,57,53,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
+
+    // parallax ridges
+    var layers = [
+      { off: 0.12, amp: 90, base: 0.58, step: 130, color: '#1f1f1f', alpha: 0.9 },
+      { off: 0.28, amp: 60, base: 0.70, step: 90, color: '#191919', alpha: 0.95 }
+    ];
+    for (var l = 0; l < layers.length; l++) {
+      var L = layers[l];
+      ctx.beginPath();
+      ctx.moveTo(0, H);
+      for (var sx = 0; sx <= W + 20; sx += 14) {
+        var wx = cam.x * L.off + sx;
+        var yy = H * L.base + Math.sin(wx / L.step) * L.amp + Math.sin(wx / (L.step * 2.7) + 1) * L.amp * 0.5 - cam.y * 0.06;
+        ctx.lineTo(sx, yy);
+      }
+      ctx.lineTo(W, H);
+      ctx.closePath();
+      ctx.fillStyle = L.color;
+      ctx.globalAlpha = L.alpha;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function drawTerrain() {
+    var step = 7;
+    ctx.beginPath();
+    ctx.moveTo(-20, H + 400);
+    for (var sx = -20; sx <= W + 20; sx += step) {
+      var wx = cam.x + sx;
+      var sy = terrainY(wx) - cam.y;
+      ctx.lineTo(sx, sy);
+    }
+    ctx.lineTo(W + 20, H + 400);
+    ctx.closePath();
+    var tg = ctx.createLinearGradient(0, H * 0.3, 0, H);
+    tg.addColorStop(0, '#2a2a2a');
+    tg.addColorStop(1, '#151515');
+    ctx.fillStyle = tg;
+    ctx.fill();
+
+    // snowy / dusty edge
+    ctx.beginPath();
+    for (var x2 = -20; x2 <= W + 20; x2 += step) {
+      var wx2 = cam.x + x2;
+      var sy2 = terrainY(wx2) - cam.y;
+      if (x2 === -20) ctx.moveTo(x2, sy2); else ctx.lineTo(x2, sy2);
+    }
+    ctx.strokeStyle = 'rgba(244,241,236,0.85)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // red accent line just below the edge
+    ctx.beginPath();
+    for (var x3 = -20; x3 <= W + 20; x3 += step) {
+      var wx3 = cam.x + x3;
+      var sy3 = terrainY(wx3) - cam.y + 9;
+      if (x3 === -20) ctx.moveTo(x3, sy3); else ctx.lineTo(x3, sy3);
+    }
+    ctx.strokeStyle = 'rgba(229,57,53,0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+
+  function drawScenery() {
+    var spacing = 165;
+    var first = Math.floor(cam.x / spacing) - 1;
+    var last = Math.floor((cam.x + W) / spacing) + 1;
+    for (var i = first; i <= last; i++) {
+      var wx = i * spacing + ((i * 73) % 60);
+      var sx = wx - cam.x;
+      var sy = terrainY(wx) - cam.y;
+      var pick = Math.abs(i * 37) % 5;
+      var size = 0.65 + (Math.abs(i * 53) % 40) / 55;
+      if (pick < 3) {
+        // pine tree silhouettes
+        ctx.fillStyle = '#242424';
+        var h = 58 * size;
+        var w = 20 * size;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy - h);
+        ctx.lineTo(sx - w, sy);
+        ctx.lineTo(sx + w, sy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(sx, sy - h * 1.55);
+        ctx.lineTo(sx - w * 0.72, sy - h * 0.5);
+        ctx.lineTo(sx + w * 0.72, sy - h * 0.5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(184,180,174,0.14)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = '#1b1b1b';
+        ctx.fillRect(sx - 1.5, sy - 4, 3, 5);
+      } else {
+        // rocks
+        ctx.fillStyle = '#2b2b2b';
+        ctx.beginPath();
+        ctx.moveTo(sx - 9 * size, sy + 1);
+        ctx.lineTo(sx - 4 * size, sy - 9 * size);
+        ctx.lineTo(sx + 5 * size, sy - 7 * size);
+        ctx.lineTo(sx + 10 * size, sy + 1);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(184,180,174,0.12)';
+        ctx.stroke();
+      }
+    }
+
+    // speed streaks
+    if (state.started && state.v > 520) {
+      var alpha = Math.min(0.35, (state.v - 520) / 1200);
+      ctx.strokeStyle = 'rgba(244,241,236,' + alpha.toFixed(3) + ')';
+      ctx.lineWidth = 1;
+      for (var k = 0; k < 9; k++) {
+        var yy = ((k * 977) % 100) / 100 * H;
+        var len = 40 + ((k * 131) % 90);
+        var xx = ((k * 613) % 1440) - ((performance.now() * (0.35 + k * 0.02)) % (W + 200));
+        ctx.beginPath();
+        ctx.moveTo(xx, yy);
+        ctx.lineTo(xx + len, yy);
+        ctx.stroke();
+      }
+    }
+
+    // distance markers every 100 m
+    var mark = Math.floor(state.x / 4000);
+    for (var m = mark - 1; m <= mark + 1; m++) {
+      if (m < 0) continue;
+      var mx = m * 4000;
+      var msx = mx - cam.x;
+      if (msx < -80 || msx > W + 80) continue;
+      var msy = terrainY(mx) - cam.y;
+      ctx.strokeStyle = 'rgba(229,57,53,0.65)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(msx, msy - 46);
+      ctx.lineTo(msx, msy);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(229,57,53,0.85)';
+      ctx.beginPath();
+      ctx.moveTo(msx, msy - 46);
+      ctx.lineTo(msx + 22, msy - 40);
+      ctx.lineTo(msx, msy - 34);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  function drawParticles() {
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      var a = Math.max(0, p.life / p.max);
+      ctx.globalAlpha = a * 0.55;
+      ctx.fillStyle = '#B8B4AE';
+      ctx.beginPath();
+      ctx.arc(p.x - cam.x, p.y - cam.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawBike() {
+    var x = state.x - cam.x;
+    var y = state.y - cam.y;
+    var rot = state.rot;
+
+    // shadow
+    ctx.globalAlpha = 0.35;
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.ellipse(x, y + 26, 46, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rot);
+
+    // wheels
+    ctx.strokeStyle = '#B8B4AE';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(-26, 16, 17, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(28, 16, 17, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(184,180,174,0.28)';
+    ctx.lineWidth = 1;
+    for (var i = 0; i < 6; i++) {
+      var a = (i / 6) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(-26 + Math.cos(a) * 4, 16 + Math.sin(a) * 4);
+      ctx.lineTo(-26 + Math.cos(a) * 16, 16 + Math.sin(a) * 16);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(28 + Math.cos(a) * 4, 16 + Math.sin(a) * 4);
+      ctx.lineTo(28 + Math.cos(a) * 16, 16 + Math.sin(a) * 16);
+      ctx.stroke();
+    }
+
+    // frame
+    ctx.strokeStyle = '#E53935';
+    ctx.lineWidth = 4;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-26, 16);
+    ctx.lineTo(-4, -4);
+    ctx.lineTo(18, -10);
+    ctx.lineTo(28, 16);
+    ctx.moveTo(-4, -4);
+    ctx.lineTo(10, 14);
+    ctx.lineTo(28, 16);
+    ctx.moveTo(18, -10);
+    ctx.lineTo(10, 14);
+    ctx.stroke();
+
+    // bars + fork
+    ctx.strokeStyle = '#B8B4AE';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(18, -10);
+    ctx.lineTo(30, -20);
+    ctx.lineTo(40, -20);
+    ctx.moveTo(30, -20);
+    ctx.lineTo(28, 16);
+    ctx.stroke();
+
+    // rider
+    ctx.strokeStyle = '#F4F1EC';
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-2, -8);
+    ctx.lineTo(-12, -30);
+    ctx.lineTo(2, -44);
+    ctx.stroke();
+    ctx.fillStyle = '#F4F1EC';
+    ctx.beginPath();
+    ctx.arc(4, -50, 8, 0, Math.PI * 2);
+    ctx.fill();
+    // helmet
+    ctx.fillStyle = '#E53935';
+    ctx.beginPath();
+    ctx.arc(6, -52, 9, Math.PI * 1.05, Math.PI * 1.95);
+    ctx.fill();
+    // arms
+    ctx.strokeStyle = '#F4F1EC';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(-8, -30);
+    ctx.lineTo(26, -22);
+    ctx.stroke();
+    // legs
+    ctx.strokeStyle = '#9a958d';
+    ctx.beginPath();
+    ctx.moveTo(-4, -6);
+    ctx.lineTo(4, 10);
+    ctx.lineTo(10, 14);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  function render() {
+    drawBackground();
+    drawTerrain();
+    drawScenery();
+    drawParticles();
+    drawBike();
+  }
+
+  // ---------- loop ----------
+  function frame(now) {
+    if (!lastTime) lastTime = now;
+    var dt = Math.min(0.033, (now - lastTime) / 1000);
+    lastTime = now;
+    update(dt);
+    render();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // ---------- input ----------
+  function keyDown(e) {
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+      e.preventDefault();
+      if (!state.started && !state.crashed) start(); else input.jump = true;
+    } else if (e.code === 'ArrowLeft') {
+      e.preventDefault(); input.left = true;
+    } else if (e.code === 'ArrowRight') {
+      e.preventDefault(); input.right = true;
+    } else if (e.code === 'KeyR') {
+      start();
+    }
+  }
+  function keyUp(e) {
+    if (e.code === 'ArrowLeft') input.left = false;
+    if (e.code === 'ArrowRight') input.right = false;
+  }
+  window.addEventListener('keydown', keyDown, { passive: false });
+  window.addEventListener('keyup', keyUp);
+
+  document.getElementById('startBtn').addEventListener('click', start);
+  document.getElementById('restartBtn').addEventListener('click', start);
+
+  // touch controls
+  var touchButtons = document.querySelectorAll('.touch button');
+  Array.prototype.forEach.call(touchButtons, function (btn) {
+    var key = btn.getAttribute('data-key');
+    function down(e) {
+      e.preventDefault();
+      if (!state.started) { start(); return; }
+      if (key === 'jump') input.jump = true;
+      if (key === 'left') input.left = true;
+      if (key === 'right') input.right = true;
+    }
+    function up(e) {
+      e.preventDefault();
+      if (key === 'left') input.left = false;
+      if (key === 'right') input.right = false;
+    }
+    btn.addEventListener('pointerdown', down);
+    btn.addEventListener('pointerup', up);
+    btn.addEventListener('pointercancel', up);
+    btn.addEventListener('pointerleave', up);
+  });
+})();
+</script>
+</body>
+</html>
