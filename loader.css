@@ -1,0 +1,119 @@
+/* ============================================================
+   MTB wheel loading screen (loader.js)
+   A spinning mountain-bike wheel covers the first paint; once
+   loading finishes the wheel blows up past the screen edge and
+   the overlay fades out to reveal the site.
+   ============================================================ */
+
+.wl {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #0d0d0f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  font-family: "Helvetica Neue", Arial, "PingFang SC", sans-serif;
+  transition: opacity 0.42s ease 0.34s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.wl.is-done {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.wl-wheel {
+  position: relative;
+  width: 230px;
+  height: 230px;
+}
+
+/* static rubber tyre */
+.wl-tire {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #18181b 0 58%, #050506 60% 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 60px rgba(0, 0, 0, 0.6);
+}
+
+/* spinning spokes + rim */
+.wl-rotor {
+  position: absolute;
+  inset: 26px;
+  animation: wl-spin 0.5s linear infinite;
+  will-change: transform;
+}
+
+.wl-rotor img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* hub cap */
+.wl-hub {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 36%, #4a4a50, #16161a 70%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+@keyframes wl-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* exit: wheel scales up far past the viewport */
+.wl.is-done .wl-wheel {
+  animation: wl-zoom 0.72s cubic-bezier(0.6, 0.05, 0.3, 1) forwards;
+}
+
+@keyframes wl-zoom {
+  to {
+    transform: scale(26);
+    opacity: 0;
+  }
+}
+
+.wl-copy {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.wl-bar {
+  width: 220px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.wl-bar-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #e53935;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wl-rotor { animation-duration: 1.6s; }
+}

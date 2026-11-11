@@ -1686,6 +1686,31 @@ html.hero-motion-ready .page-home .hero-wheel {
   transform-origin: left center;
 }
 
+/* Scroll reveal for the KEEP LOOKING gallery (moments-motion.js).
+   --rv (0..1) is set by the script from each frame's position, so the
+   photos fade / lift / settle one after another as the collage passes. */
+.moments-motion .moments-item {
+  --rv: 0;
+  --py: 0;
+  opacity: var(--rv);
+  transform:
+    translate3d(0, calc((1 - var(--rv)) * 56px + var(--py) * 1px), 0)
+    scale(calc(0.93 + var(--rv) * 0.07));
+  filter: blur(calc((1 - var(--rv)) * 6px));
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
+}
+
+.moments-motion .moments-item img {
+  transform: scale(calc(1.16 - var(--rv) * 0.16));
+  transition: transform 0.05s linear;
+}
+
+.moments-motion .moments-item figcaption {
+  opacity: var(--rv);
+  transform: translateY(calc((1 - var(--rv)) * 12px));
+}
+
 /* ===================================================
    FINAL PAGE / FOOTER
    A cream header + closing statement + rider + ticker
@@ -2366,4 +2391,140 @@ html.hero-motion-ready .page-home .hero-wheel {
 .moments-pin > .nav-links,
 .moments-pin > .top-divider {
   display: none;
+}
+
+/* ===================================================
+   SITE MOTION (motion.js)
+   Keyframe based on purpose: transitions can be swallowed when
+   the hidden and visible class land in the same frame, keyframes
+   always play. Titles get a bold lift, copy a quiet fade.
+=================================================== */
+html.mo .hero-title,
+html.mo .about-title,
+html.mo .work-title,
+html.mo .moments-title,
+html.mo .moments-end-title,
+html.mo .football-title,
+html.mo .mtb-title,
+html.mo .photo-title,
+html.mo .end-title,
+html.mo .coach-title,
+html.mo .help-title {
+  opacity: 0;
+}
+
+html.mo-ready .hero-title,
+html.mo-ready .about-title,
+html.mo-ready .work-title,
+html.mo-ready .moments-title,
+html.mo-ready .moments-end-title,
+html.mo-ready .football-title,
+html.mo-ready .mtb-title,
+html.mo-ready .photo-title,
+html.mo-ready .end-title,
+html.mo-ready .coach-title,
+html.mo-ready .help-title {
+  opacity: 1;
+}
+
+html.mo .mo-t {
+  opacity: 0;
+}
+
+html.mo .mo-t.is-in {
+  animation: mo-title-in 0.95s cubic-bezier(0.16, 0.84, 0.3, 1) both;
+  animation-delay: calc(var(--mo-delay, 0) * 1ms);
+}
+
+@keyframes mo-title-in {
+  from {
+    opacity: 0;
+    transform: translateY(48px) scale(0.982);
+    filter: blur(12px);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(1px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+html.mo .mo-s {
+  opacity: 0;
+}
+
+html.mo .mo-s.is-in {
+  animation: mo-copy-in 0.72s cubic-bezier(0.16, 0.84, 0.3, 1) both;
+  animation-delay: calc(var(--mo-delay, 0) * 1ms);
+}
+
+@keyframes mo-copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+    filter: blur(2.5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+
+/* ===================================================
+   MTB VIDEO (coaching.html) — bilibili embed
+=================================================== */
+.coach-video {
+  width: 1440px;
+  margin: 0 auto;
+  background-color: #171717;
+  padding: 96px 76px 120px;
+  box-sizing: border-box;
+}
+
+.coach-video-title {
+  color: #F4F1EC;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-align: center;
+  margin: 0 0 16px;
+}
+
+.coach-video-rule {
+  width: 72px;
+  height: 4px;
+  background-color: #E53935;
+  margin: 0 auto 42px;
+}
+
+.coach-video-frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 26px 70px rgba(0, 0, 0, 0.55);
+}
+
+.coach-video-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.coach-video-frame video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
 }

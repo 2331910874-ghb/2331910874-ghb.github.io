@@ -9,9 +9,44 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Jim+Nightshade&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css?v=27">
+  <link rel="stylesheet" href="style.css?v=34">
+  <link rel="stylesheet" href="loader.css?v=1">
+  <script>
+    /* hide the big titles from the very first paint so motion.js can
+       animate them in without a flash of the finished state */
+    document.documentElement.classList.add('mo');
+    setTimeout(function () {
+      if (!document.documentElement.classList.contains('mo-ready') &&
+          !document.documentElement.classList.contains('mo-pause')) {
+        document.documentElement.classList.remove('mo');
+      }
+    }, 3000);
+  </script>
+
 </head>
 <body>
+<script>
+  (function () {
+    try {
+      document.documentElement.classList.add('mo-pause');
+        var d = document.createElement('div');
+        d.id = 'mtbLoader';
+        d.className = 'wl';
+        d.innerHTML =
+          '<div class="wl-wheel">' +
+            '<div class="wl-tire"></div>' +
+            '<div class="wl-rotor">' +
+              '<img src="assets/wheel-spokes.png" alt="">' +
+              '<img src="assets/wheel-ring-front.png" alt="">' +
+            '</div>' +
+            '<div class="wl-hub"></div>' +
+          '</div>' +
+          '<div class="wl-copy">LOADING RIDE&nbsp;&hellip;</div>' +
+          '<div class="wl-bar"><span class="wl-bar-fill"></span></div>';
+        document.body.appendChild(d);
+    } catch (e) {}
+  })();
+</script>
 <header class="site-header" id="siteHeader">
   <div class="site-header-inner">
     <a href="index.html#home" class="site-brand">D Y L A N &nbsp;/&nbsp; PORTFOLIO</a>
@@ -116,5 +151,7 @@
       window.addEventListener('orientationchange', fitStage);
     })();
   </script>
+  <script src="motion.js?v=4"></script>
+  <script src="loader.js?v=2"></script>
 </body>
 </html>
