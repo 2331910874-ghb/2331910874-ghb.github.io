@@ -87,19 +87,22 @@
   <div><span class="stat-label">DISTANCE</span><span class="stat-value" id="distance">0<small>M</small></span></div>
   <div><span class="stat-label">BEST</span><span class="stat-value" id="best">0<small>M</small></span></div>
   <div><span class="stat-label">FLIPS</span><span class="stat-value" id="flips">0</span></div>
+  <div><span class="stat-label">TIME</span><span class="stat-value" id="time">0.0<small>S</small></span></div>
 </div>
 
 <div class="overlay" id="startOverlay">
   <div class="panel">
     <div class="eyebrow">DYLAN / 3D MINI GAME</div>
     <h1 class="title">DESCEND 3D.</h1>
-    <p class="subtitle">Mountain downhill. Hold W to pedal, A / D to steer the front wheel, Space to jump. Land badly and the run ends.</p>
+    <p class="subtitle">Mountain downhill. W to pedal, S to brake. A / D steer the front wheel. Hold Space and release at the lip to jump. Land badly and the run ends.</p>
     <div class="keys">
-      <span><b>W</b> Pedal</span>
-      <span><b>A / D</b> Steer front wheel</span>
-      <span><b>SPACE</b> Jump</span>
-      <span><b>Q / E</b> Front / back flip</span>
-      <span><b>R</b> Restart</span>
+      <span><b>W / S</b> Pedal / brake</span>
+      <span><b>A / D</b> Steer &amp; whip</span>
+      <span><b>SPACE</b> Hold, release to jump</span>
+      <span><b>↑ / ↓</b> Front / back flip</span>
+      <span><b>← / →</b> Spin</span>
+      <span><b>C</b> Camera</span>
+      <span><b>R</b> Checkpoint (+3s)</span>
     </div>
     <button class="play" id="startBtn"><span>▶</span> RIDE</button>
   </div>
@@ -144,6 +147,7 @@
   var distEl = document.getElementById('distance');
   var bestEl = document.getElementById('best');
   var flipsEl = document.getElementById('flips');
+  var timeEl = document.getElementById('time');
   var startOverlay = document.getElementById('startOverlay');
   var pauseOverlay = document.getElementById('pauseOverlay');
   var crashOverlay = document.getElementById('crashOverlay');
@@ -152,7 +156,7 @@
 
   var scene, camera, renderer, clock;
   var bike, frontSteer, wheels = [], shadow;
-  var chunks = [], trees = [], rocks = [], peaks = [], platforms = [], snow;
+  var chunks = [], trees = [], rocks = [], peaks = [], platforms = [], flags = [], snow;
   var state, best;
   var keys = { left: false, right: false, pedal: false, jump: false, q: false, e: false };
   var paused = false;
@@ -173,6 +177,11 @@
     var lat = Math.exp(-(x * x) / 100);
     var h = 0;
     var seg = Math.floor(z / 110);
+    // rolling washboard section
+    h += 1.3 * Math.sin(z * 0.38) * Math.exp(-(x * x) / 1600);
+    if (seg % 5 === 2) h -= 1.9 * Math.exp(-Math.pow((z - (seg * 110 + 80)) / 6, 2)) * Math.exp(-(x * x) / 400);
+    // rocky sections
+    if (seg % 4 === 1) h += 0.5 * Math.sin(z * 2.2) * Math.sin(x * 1.1 + 0.7);
     for (var s = seg - 1; s <= seg + 1; s++) {
       if (s < 0) continue;
       var base = s * 110;
@@ -189,6 +198,12 @@
       }
     }
     return h;
+  }
+
+  function microHeight(x, z) {
+    var seg = Math.floor(z / 110);
+    if (seg % 4 !== 1) return 0;
+    return 0.5 * Math.sin(z * 2.2) * Math.sin(x * 1.1 + 0.7);
   }
 
   function groundHeight(x, z) {
@@ -243,6 +258,7 @@
     buildTrees();
     buildRocks();
     buildPlatforms();
+    buildFlags();
     buildSnow();
 
     bike = buildBike();
@@ -403,7 +419,7 @@
     var trunkMat = new THREE.MeshStandardMaterial({ color: 0x3a2c22, roughness: 1 });
     var pineMat = new THREE.MeshStandardMaterial({ color: 0x27402f, roughness: 0.95, flatShading: true });
     var snowMat = new THREE.MeshStandardMaterial({ color: 0xf2ede3, roughness: 0.9 });
-    for (var i = 0; i < 90; i++) {
+    for (var i = 0; i < 140; i++) {
       var t = new THREE.Group();
       var trunk = new THREE.Mesh(trunkGeo, trunkMat); trunk.position.y = 0.6; t.add(trunk);
       var c1 = new THREE.Mesh(coneGeo1, pineMat); c1.position.y = 2.3; t.add(c1);
@@ -412,7 +428,7 @@
       var s = 0.7 + Math.random() * 1.1;
       t.scale.set(s, s, s);
       var side = Math.random() < 0.5 ? -1 : 1;
-      t.position.x = side * (6 + Math.random() * 46);
+      t.position.x = side * (5 + Math.random() * 26);
       t.userData.z = 30 + Math.random() * 560;
       scene.add(t);
       trees.push(t);
@@ -422,12 +438,12 @@
   function buildRocks() {
     var geo = new THREE.IcosahedronGeometry(0.8, 0);
     var mat = new THREE.MeshStandardMaterial({ color: 0x4a4a4a, roughness: 1, flatShading: true });
-    for (var i = 0; i < 55; i++) {
+    for (var i = 0; i < 90; i++) {
       var r = new THREE.Mesh(geo, mat);
       var s = 0.5 + Math.random() * 1.6;
       r.scale.set(s, s * 0.75, s);
       var side = Math.random() < 0.5 ? -1 : 1;
-      r.position.x = side * (6 + Math.random() * 44);
+      r.position.x = side * (4 + Math.random() * 30);
       r.userData.z = 30 + Math.random() * 560;
       scene.add(r);
       rocks.push(r);
@@ -467,6 +483,24 @@
       g.userData.z = nz;
       scene.add(g);
       platforms.push(g);
+    }
+  }
+
+  function buildFlags() {
+    var poleMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.7 });
+    var flagMat = new THREE.MeshStandardMaterial({ color: 0xe53935, roughness: 0.7, side: THREE.DoubleSide });
+    for (var i = 0; i < 14; i++) {
+      var g = new THREE.Group();
+      var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.2, 5), poleMat);
+      pole.position.y = 1.1;
+      g.add(pole);
+      var flag = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 0.6), flagMat);
+      flag.position.set(0.45, 1.95, 0);
+      g.add(flag);
+      g.userData.z = i * 60;
+      g.userData.side = (i % 2 === 0) ? 1 : -1;
+      scene.add(g);
+      flags.push(g);
     }
   }
 
@@ -614,9 +648,14 @@
       x: 0, z: 0, y: groundHeight(0, 0),
       speed: 7, vy: 0,
       heading: 0, steerAngle: 0,
-      grounded: true, started: false, crashed: false, dist: 0, pitch: 0, launchCd: 0, flips: 0, flipAccum: 0
+      grounded: true, started: false, crashed: false, dist: 0, pitch: 0, launchCd: 0,
+      flips: 0, flipAccum: 0, spins: 0, spin: 0, airYaw: 0, weight: 0,
+      time: 0, penalty: 0, cpX: 0, cpZ: 0, cpHeading: 0, checkpointZ: 0,
+      jumpHold: false, jumpRelease: false, cameraMode: 0, shake: 0, microSmooth: 0
     };
-    keys.left = keys.right = keys.pedal = keys.jump = keys.q = keys.e = false;
+    keys.pedal = keys.brake = keys.left = keys.right = false;
+    keys.up = keys.down = keys.spinL = keys.spinR = false;
+    state.jumpHold = false;
     flipsEl.textContent = '0';
     if (bike) {
       bike.position.set(0, state.y, 0);
@@ -653,66 +692,144 @@
     crashOverlay.classList.remove('hidden');
   }
 
+  function respawn() {
+    if (!state.started) return;
+    state.x = state.cpX;
+    state.z = state.cpZ;
+    state.heading = state.cpHeading;
+    state.y = groundHeight(state.x, state.z);
+    state.speed = 5;
+    state.vy = 0;
+    state.grounded = true;
+    state.pitch = 0;
+    state.airYaw = 0;
+    state.spin = 0;
+    state.flipAccum = 0;
+    state.time += 3;
+    state.penalty += 3;
+  }
+
+  function cycleCamera() {
+    state.cameraMode = (state.cameraMode + 1) % 3;
+  }
+
   function norm(a) {
     while (a > Math.PI) a -= Math.PI * 2;
     while (a < -Math.PI) a += Math.PI * 2;
     return a;
   }
 
+  function collideObstacles() {
+    var i, o, dx, dz, d, r;
+    for (i = 0; i < trees.length; i++) {
+      o = trees[i];
+      if (Math.abs(o.position.z - state.z) > 7) continue;
+      dx = state.x - o.position.x;
+      dz = state.z - o.position.z;
+      d = Math.sqrt(dx * dx + dz * dz) || 0.001;
+      r = 1.05;
+      if (d < r) {
+        var push = (r - d) + 0.05;
+        state.x += (dx / d) * push;
+        state.z += (dz / d) * push;
+        state.speed = Math.min(state.speed, 2.0);
+        state.shake = 0.4;
+      }
+    }
+    for (i = 0; i < rocks.length; i++) {
+      o = rocks[i];
+      if (Math.abs(o.position.z - state.z) > 7) continue;
+      dx = state.x - o.position.x;
+      dz = state.z - o.position.z;
+      d = Math.sqrt(dx * dx + dz * dz) || 0.001;
+      r = 1.0;
+      if (d < r) {
+        var push2 = (r - d) + 0.05;
+        state.x += (dx / d) * push2;
+        state.z += (dz / d) * push2;
+        state.speed = Math.min(state.speed, 1.6);
+        state.shake = 0.45;
+      }
+    }
+  }
+
   function update(dt) {
     if (!state.started) return;
     state.launchCd = Math.max(0, state.launchCd - dt);
+    state.time += dt;
+    state.shake = Math.max(0, state.shake - dt);
 
     var fx = Math.sin(state.heading);
     var fz = Math.cos(state.heading);
     var slope = slopeAt(state.x, state.z, fx, fz);
 
     if (state.grounded) {
+      // throttle / brake
       if (keys.pedal) state.speed += 9 * dt;
-      else state.speed -= 2.2 * dt;
+      if (keys.brake) state.speed -= 15 * dt;
+      if (!keys.pedal && !keys.brake) state.speed -= 2.2 * dt;
       state.speed += Math.max(0, -slope) * 8 * dt;
-      state.speed = Math.max(4, Math.min(32, state.speed));
+      state.speed = Math.max(-5, Math.min(32, state.speed));
 
+      // front-wheel steering
       var steerIn = (keys.left ? 1 : 0) - (keys.right ? 1 : 0);
       state.steerAngle += (steerIn * 0.42 - state.steerAngle) * Math.min(1, dt * 8);
-      state.heading += state.steerAngle * (0.35 + state.speed * 0.045) * dt;
+      state.heading += state.steerAngle * (0.35 + Math.abs(state.speed) * 0.045) * dt;
 
       state.x += Math.sin(state.heading) * state.speed * dt;
       state.z += Math.cos(state.heading) * state.speed * dt;
       state.x = Math.max(-60, Math.min(60, state.x));
+
+      // weight shift (ground): up = rear wheel, down = front wheel
+      state.weight += (((keys.up ? 1 : 0) - (keys.down ? 1 : 0)) - state.weight) * Math.min(1, dt * 7);
+
       var gy = groundHeight(state.x, state.z);
+      var micro = microHeight(state.x, state.z);
+      if (state.microSmooth === undefined) state.microSmooth = micro;
+      state.microSmooth += (micro - state.microSmooth) * Math.min(1, dt / 0.07);
+      var gySmooth = gy - micro + state.microSmooth;
       if (gy < state.y - 1.2) {
-        // rode off a drop platform
         state.grounded = false;
         state.vy = 0;
       } else {
-        state.y = gy;
+        state.y = gySmooth;
       }
 
-      var actualSlope = slopeAt(state.x, state.z, Math.sin(state.heading), Math.cos(state.heading));
-      state.pitch += (-Math.atan(actualSlope) - state.pitch) * Math.min(1, dt * 10);
+      var fwdX = Math.sin(state.heading), fwdZ = Math.cos(state.heading);
+      var slopeWide = (groundHeight(state.x + fwdX * 1.6, state.z + fwdZ * 1.6) - groundHeight(state.x - fwdX * 1.6, state.z - fwdZ * 1.6)) / 3.2;
+      var targetPitch = -Math.atan(slopeWide) - state.weight * 0.22 + (state.jumpHold ? 0.07 : 0);
+      state.pitch += (targetPitch - state.pitch) * Math.min(1, dt * 7);
 
       wheels[0].rotation.x += (state.speed / 0.44) * dt;
       wheels[1].rotation.x += (state.speed / 0.44) * dt;
 
-      if (state.grounded && state.speed > 9 && actualSlope < -0.62 && state.launchCd <= 0) {
+      // hold-to-compress, release-to-jump (lip release gives a boost)
+      if (state.jumpRelease) {
+        state.jumpRelease = false;
+        state.vy = 4.8 + Math.abs(state.speed) * 0.12;
+        if (actualSlope < -0.35) {
+          state.vy += 2.4;
+          state.perfect = (state.perfect || 0) + 1;
+        }
         state.grounded = false;
-        state.vy = 2 + state.speed * 0.5;
-        state.launchCd = 1.4;
       }
 
-      if (keys.jump) {
-        keys.jump = false;
-        state.vy = 6.2;
-        state.grounded = false;
+      // checkpoints every 200 m
+      var cp = Math.floor(state.z / 200) * 200;
+      if (cp > state.checkpointZ) {
+        state.checkpointZ = cp;
+        state.cpX = state.x;
+        state.cpZ = state.z;
+        state.cpHeading = state.heading;
       }
     } else {
       state.vy -= 16 * dt;
       state.x += Math.sin(state.heading) * state.speed * dt;
       state.z += Math.cos(state.heading) * state.speed * dt;
       state.y += state.vy * dt;
-      // Q = front flip, E = back flip. Full 360 rotations are allowed.
-      var pitchIn = (keys.q ? 1 : 0) - (keys.e ? 1 : 0);
+
+      // ↑ / ↓ = front / back flip
+      var pitchIn = (keys.up ? 1 : 0) - (keys.down ? 1 : 0);
       if (pitchIn) {
         var spin = pitchIn * 4.8 * dt;
         state.pitch += spin;
@@ -723,9 +840,21 @@
           flipsEl.textContent = state.flips;
         }
       }
-      state.steerAngle += ((keys.left ? 1 : 0) - (keys.right ? 1 : 0)) * 0.2 * dt;
-      // small lateral corrections with A / D while airborne
-      state.x += ((keys.left ? 1 : 0) - (keys.right ? 1 : 0)) * 3.2 * dt;
+
+      // A / D = whip
+      var whipIn = (keys.left ? 1 : 0) - (keys.right ? 1 : 0);
+      state.airYaw += (whipIn * 0.9 - state.airYaw) * Math.min(1, dt * 5);
+
+      // ← / → = 360 spin
+      var spinIn = (keys.spinL ? 1 : 0) - (keys.spinR ? 1 : 0);
+      if (spinIn) {
+        state.spin += spinIn * 5.0 * dt;
+        if (Math.abs(state.spin) >= Math.PI * 2) {
+          state.spins++;
+          state.spin -= Math.sign(state.spin) * Math.PI * 2;
+        }
+      }
+
       state.x = Math.max(-60, Math.min(60, state.x));
 
       var gy = groundHeight(state.x, state.z);
@@ -733,24 +862,29 @@
         var landSlope = slopeAt(state.x, state.z, Math.sin(state.heading), Math.cos(state.heading));
         var landPitch = -Math.atan(landSlope);
         var diff = Math.abs(norm(state.pitch - landPitch));
-        if (diff > 2.4) {
+        var yawBad = Math.abs(norm(state.airYaw)) > 1.0 || Math.abs(norm(state.spin)) > 1.1;
+        if (diff > 2.4 || yawBad) {
           state.y = gy;
           crash();
         } else {
           state.y = gy;
+          state.microSmooth = microHeight(state.x, state.z);
           state.vy = 0;
           state.grounded = true;
           state.pitch = landPitch;
-          keys.jump = false;
+          state.airYaw = 0;
+          state.spin = 0;
         }
       }
     }
 
+    collideObstacles();
     state.dist = state.z;
     flipsEl.textContent = state.flips;
+    timeEl.innerHTML = state.time.toFixed(1) + '<small>S</small>';
 
-    bike.position.set(state.x, state.y, state.z);
-    bike.rotation.y = state.heading;
+    bike.position.set(state.x, state.y + 0.22, state.z);
+    bike.rotation.y = state.heading + (state.airYaw || 0) + (state.spin || 0);
     bike.rotation.x = state.pitch;
     bike.rotation.z = -state.steerAngle * 0.12;
     frontSteer.rotation.y = state.steerAngle;
@@ -758,22 +892,53 @@
     shadow.position.set(state.x, groundHeight(state.x, state.z) + 0.02, state.z);
     shadow.material.opacity = Math.max(0.05, 0.3 - Math.max(0, state.y - groundHeight(state.x, state.z)) * 0.05);
 
+    // camera modes: 0 chase, 1 side, 2 helmet
     var backX = -Math.sin(state.heading), backZ = -Math.cos(state.heading);
     var rightX = Math.cos(state.heading), rightZ = -Math.sin(state.heading);
-    var targetPos = new THREE.Vector3(
-      state.x + backX * 7.0 + rightX * 2.6,
-      state.y + 4.0,
-      state.z + backZ * 7.0 + rightZ * 2.6
-    );
-    var minY = groundHeight(targetPos.x, targetPos.z) + 2.2;
-    if (targetPos.y < minY) targetPos.y = minY;
-    var lookAt = new THREE.Vector3(
-      state.x + Math.sin(state.heading) * 8,
-      state.y + 1.2,
-      state.z + Math.cos(state.heading) * 8
-    );
-    camera.position.lerp(targetPos, 1 - Math.exp(-dt * 5));
+    var targetPos, lookAt;
+    if (state.cameraMode === 2) {
+      targetPos = new THREE.Vector3(
+        state.x + Math.sin(state.heading) * 0.15,
+        state.y + 1.62,
+        state.z + Math.cos(state.heading) * 0.15
+      );
+      lookAt = new THREE.Vector3(
+        state.x + Math.sin(state.heading) * 12,
+        state.y + 1.35,
+        state.z + Math.cos(state.heading) * 12
+      );
+      camera.position.lerp(targetPos, 1 - Math.exp(-dt * 14));
+    } else if (state.cameraMode === 1) {
+      targetPos = new THREE.Vector3(
+        state.x + rightX * 9 + backX * 2,
+        state.y + 3.2,
+        state.z + rightZ * 9 + backZ * 2
+      );
+      lookAt = new THREE.Vector3(state.x, state.y + 1.1, state.z);
+      camera.position.lerp(targetPos, 1 - Math.exp(-dt * 5));
+    } else {
+      targetPos = new THREE.Vector3(
+        state.x + backX * 7.0 + rightX * 2.6,
+        state.y + 4.0,
+        state.z + backZ * 7.0 + rightZ * 2.6
+      );
+      var minY = groundHeight(targetPos.x, targetPos.z) + 2.2;
+      if (targetPos.y < minY) targetPos.y = minY;
+      lookAt = new THREE.Vector3(
+        state.x + Math.sin(state.heading) * 8,
+        state.y + 1.2,
+        state.z + Math.cos(state.heading) * 8
+      );
+      camera.position.lerp(targetPos, 1 - Math.exp(-dt * 5));
+    }
+    if (state.shake > 0) {
+      camera.position.x += (Math.random() - 0.5) * state.shake * 0.9;
+      camera.position.y += (Math.random() - 0.5) * state.shake * 0.9;
+    }
     camera.lookAt(lookAt);
+    var targetFov = 62 + Math.min(9, Math.abs(state.speed) * 0.28);
+    camera.fov += (targetFov - camera.fov) * Math.min(1, dt * 3);
+    camera.updateProjectionMatrix();
 
     recycleChunks();
 
@@ -781,7 +946,7 @@
       var t = trees[i];
       if (t.userData.z < state.z - 50) {
         t.userData.z += 560;
-        t.position.x = (Math.random() < 0.5 ? -1 : 1) * (6 + Math.random() * 46);
+        t.position.x = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 26);
         t.scale.setScalar(0.7 + Math.random() * 1.1);
       }
       t.position.z = t.userData.z;
@@ -791,7 +956,7 @@
       var r = rocks[j];
       if (r.userData.z < state.z - 50) {
         r.userData.z += 560;
-        r.position.x = (Math.random() < 0.5 ? -1 : 1) * (6 + Math.random() * 44);
+        r.position.x = (Math.random() < 0.5 ? -1 : 1) * (4 + Math.random() * 30);
       }
       r.position.z = r.userData.z;
       r.position.y = groundHeight(r.position.x, r.position.z) + 0.2;
@@ -814,16 +979,23 @@
       pk.position.z = pk.userData.z;
     }
 
+    for (var fi = 0; fi < flags.length; fi++) {
+      var fl = flags[fi];
+      if (fl.userData.z < state.z - 60) fl.userData.z += 840;
+      var fside = fl.userData.side || 1;
+      fl.position.set(fside * 8, groundHeight(fside * 8, fl.userData.z), fl.userData.z);
+    }
+
     snow.position.set(camera.position.x, camera.position.y - 8, camera.position.z);
     var sp = snow.geometry.attributes.position;
-    for (var s = 0; s < sp.count; s++) {
-      var yy = sp.getY(s) - dt * 2.2;
+    for (var s2 = 0; s2 < sp.count; s2++) {
+      var yy = sp.getY(s2) - dt * 2.2;
       if (yy < 0) yy = 45;
-      sp.setY(s, yy);
+      sp.setY(s2, yy);
     }
     sp.needsUpdate = true;
 
-    speedEl.innerHTML = Math.round(state.speed * 3.6) + '<small>KM/H</small>';
+    speedEl.innerHTML = Math.round(Math.abs(state.speed) * 3.6) + '<small>KM/H</small>';
     distEl.innerHTML = Math.round(state.dist) + '<small>M</small>';
   }
 
@@ -836,22 +1008,39 @@
 
   function bindEvents() {
     window.addEventListener('keydown', function (e) {
-      if (e.code === 'KeyW' || e.code === 'ArrowUp') { e.preventDefault(); keys.pedal = true; }
-      else if (e.code === 'KeyA' || e.code === 'ArrowLeft') { e.preventDefault(); keys.left = true; }
-      else if (e.code === 'KeyD' || e.code === 'ArrowRight') { e.preventDefault(); keys.right = true; }
-      else if (e.code === 'KeyQ') { e.preventDefault(); keys.q = true; }
-      else if (e.code === 'KeyE') { e.preventDefault(); keys.e = true; }
+      if (e.code === 'KeyW') { e.preventDefault(); keys.pedal = true; }
+      else if (e.code === 'KeyS') { e.preventDefault(); keys.brake = true; }
+      else if (e.code === 'KeyA') { e.preventDefault(); keys.left = true; }
+      else if (e.code === 'KeyD') { e.preventDefault(); keys.right = true; }
+      else if (e.code === 'ArrowUp') { e.preventDefault(); keys.up = true; }
+      else if (e.code === 'ArrowDown') { e.preventDefault(); keys.down = true; }
+      else if (e.code === 'ArrowLeft') { e.preventDefault(); keys.spinL = true; }
+      else if (e.code === 'ArrowRight') { e.preventDefault(); keys.spinR = true; }
       else if (e.code === 'Space') {
         e.preventDefault();
-        if (!state.started && !state.crashed) start(); else keys.jump = true;
-      } else if (e.code === 'KeyR') { start(); }
+        if (!state.started && !state.crashed) { start(); return; }
+        if (state.grounded) state.jumpHold = true;
+      } else if (e.code === 'KeyR') {
+        e.preventDefault();
+        respawn();
+      } else if (e.code === 'KeyC') {
+        e.preventDefault();
+        cycleCamera();
+      }
     });
     window.addEventListener('keyup', function (e) {
-      if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.pedal = false;
-      if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = false;
-      if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = false;
-      if (e.code === 'KeyQ') keys.q = false;
-      if (e.code === 'KeyE') keys.e = false;
+      if (e.code === 'KeyW') keys.pedal = false;
+      if (e.code === 'KeyS') keys.brake = false;
+      if (e.code === 'KeyA') keys.left = false;
+      if (e.code === 'KeyD') keys.right = false;
+      if (e.code === 'ArrowUp') keys.up = false;
+      if (e.code === 'ArrowDown') keys.down = false;
+      if (e.code === 'ArrowLeft') keys.spinL = false;
+      if (e.code === 'ArrowRight') keys.spinR = false;
+      if (e.code === 'Space' && state.jumpHold) {
+        state.jumpHold = false;
+        state.jumpRelease = true;
+      }
     });
 
     document.getElementById('startBtn').addEventListener('click', start);
@@ -873,7 +1062,7 @@
       function down(e) {
         e.preventDefault();
         if (!state.started) { start(); return; }
-        if (key === 'jump') keys.jump = true;
+        if (key === 'jump' && state.grounded) state.jumpHold = true;
         if (key === 'left') keys.left = true;
         if (key === 'right') keys.right = true;
         if (key === 'pedal') keys.pedal = true;
@@ -883,6 +1072,7 @@
         if (key === 'left') keys.left = false;
         if (key === 'right') keys.right = false;
         if (key === 'pedal') keys.pedal = false;
+        if (key === 'jump' && state.jumpHold) { state.jumpHold = false; state.jumpRelease = true; }
       }
       btn.addEventListener('pointerdown', down);
       btn.addEventListener('pointerup', up);
@@ -897,7 +1087,7 @@
     });
   }
 
-  window.game3d = { get state() { return state; }, ground: groundHeight };
+  window.game3d = { get state() { return state; }, ground: groundHeight, get bike() { return bike; }, get camera() { return camera; } };
   init();
 })();
 </script>

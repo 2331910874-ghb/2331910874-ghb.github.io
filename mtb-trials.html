@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TRIALS / MTB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Jim+Nightshade&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #0d0d0d; color: #F4F1EC; font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; }
+  #stage, #stage canvas { position: fixed; inset: 0; display: block; }
+  .top-links { position: fixed; left: 28px; top: 24px; z-index: 20; display: flex; gap: 10px; }
+  .chip { color: #B8B4AE; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-decoration: none; padding: 10px 14px; border: 1px solid rgba(184,180,174,.25); border-radius: 3px; background: rgba(20,22,20,.55); backdrop-filter: blur(6px); }
+  .chip:hover { color: #fff; border-color: #E53935; }
+  .hud { position: fixed; right: 28px; top: 24px; z-index: 20; display: flex; gap: 22px; text-align: right; pointer-events: none; }
+  .stat-label { display:block; color:#7E7A74; font-size:9px; font-weight:700; letter-spacing:.18em; margin-bottom:4px; }
+  .stat-value { color:#F4F1EC; font-size:22px; font-weight:800; line-height:1; font-variant-numeric: tabular-nums; }
+  .stat-value small { font-size:10px; font-weight:600; color:#B8B4AE; margin-left:3px; }
+  .stat-value.acc { color:#E53935; }
+  .overlay { position: fixed; inset: 0; z-index: 30; display:flex; align-items:center; justify-content:center; padding:24px; background: radial-gradient(circle at 50% 40%, rgba(20,22,20,.45) 0%, rgba(6,8,6,.88) 70%); }
+  .overlay.hidden { display:none; }
+  .panel { max-width: 620px; text-align:center; }
+  .eyebrow { color:#B8B4AE; font-size:10px; font-weight:700; letter-spacing:.24em; margin-bottom:18px; }
+  .title { font-family:'Jim Nightshade',cursive; font-weight:400; font-size:clamp(50px,8vw,88px); line-height:.95; color:#E53935; margin-bottom:16px; }
+  .subtitle { color:#B8B4AE; font-size:13px; line-height:1.7; margin-bottom:22px; }
+  .keys { display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-bottom:26px; color:#8f8a83; font-size:11px; }
+  .keys b { color:#F4F1EC; font-weight:700; }
+  .play { display:inline-flex; align-items:center; gap:12px; padding:16px 30px; background:#E53935; color:#F4F1EC; border:0; border-radius:4px; font-family:inherit; font-size:12px; font-weight:700; letter-spacing:.16em; cursor:pointer; }
+  .play:hover { background:#F4F1EC; color:#E53935; }
+  .stars { font-size:34px; letter-spacing:8px; color:#E53935; margin:6px 0 18px; }
+  .stars .off { color: #3a3a3a; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div class="top-links">
+  <a class="chip" href="index.html#mtb">&larr; BACK TO MTB</a>
+  <a class="chip" href="mtb-game-3d.html">DOWNHILL 3D</a>
+</div>
+<div class="hud">
+  <div><span class="stat-label">SPEED</span><span class="stat-value" id="speed">0<small>KM/H</small></span></div>
+  <div><span class="stat-label">LEVEL</span><span class="stat-value" id="level">1</span></div>
+  <div><span class="stat-label">TIME</span><span class="stat-value" id="time">0.0<small>S</small></span></div>
+  <div><span class="stat-label">BEST</span><span class="stat-value acc" id="best">--</span></div>
+</div>
+
+<div class="overlay" id="startOverlay">
+  <div class="panel">
+    <div class="eyebrow">DYLAN / 2D TRIALS</div>
+    <h1 class="title">TRIALS.</h1>
+    <p class="subtitle">Three hand-built tracks: ramps, gaps and spikes. Three stars per track by time. Crash and you restart at the last checkpoint.</p>
+    <div class="keys">
+      <span><b>W / &uarr;</b> throttle</span>
+      <span><b>S / &darr;</b> brake</span>
+      <span><b>A / D</b> lean</span>
+      <span><b>SPACE</b> hop</span>
+      <span><b>R</b> restart</span>
+    </div>
+    <button class="play" id="startBtn"><span>▶</span> RIDE</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="finishOverlay">
+  <div class="panel">
+    <div class="eyebrow" id="finishLabel">TRACK CLEARED</div>
+    <h1 class="title" id="finishTitle">CLEAN.</h1>
+    <div class="stars" id="finishStars">★★★</div>
+    <p class="subtitle" id="finishTime">00.0 s</p>
+    <button class="play" id="nextBtn"><span>▶</span> NEXT TRACK</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var canvas = document.getElementById('stage').appendChild(document.createElement('canvas'));
+  var ctx = canvas.getContext('2d');
+  var speedEl = document.getElementById('speed');
+  var levelEl = document.getElementById('level');
+  var timeEl = document.getElementById('time');
+  var bestEl = document.getElementById('best');
+  var startOverlay = document.getElementById('startOverlay');
+  var finishOverlay = document.getElementById('finishOverlay');
+  var finishStars = document.getElementById('finishStars');
+  var finishTime = document.getElementById('finishTime');
+  var finishLabel = document.getElementById('finishLabel');
+  var finishTitle = document.getElementById('finishTitle');
+  var nextBtn = document.getElementById('nextBtn');
+
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.floor(W * DPR); canvas.height = Math.floor(H * DPR);
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---------- levels (metres, y up) ----------
+  var LEVELS = [
+    { name: 'WARM UP', finish: 160, stars: [16, 22, 30], spawn: 2,
+      points: [[0,0],[18,0],[24,1.2],[30,1.2],[36,-0.6],[46,-0.6],[52,1.8],[58,1.8],[66,-0.4],[80,-0.4],[88,0.8],[100,0.8],[106,-1.0],[120,-1.0],[128,1.4],[136,1.4],[145,-0.2],[160,-0.2]],
+      gaps: [[100,106]], spikes: [], checkpoints: [80] },
+    { name: 'GAP CITY', finish: 200, stars: [20, 27, 36], spawn: 2,
+      points: [[0,0],[15,0],[22,2.4],[28,2.4],[36,-1.2],[44,-1.2],[50,0.2],[56,2.8],[62,2.8],[70,-2],[78,-2],[84,0.2],[90,2],[96,2],[104,-2.4],[116,-2.4],[124,2.2],[132,2.2],[142,-1.8],[152,-1.8],[162,2.4],[172,2.4],[182,-1.2],[200,-1.2]],
+      gaps: [[44,50],[78,84],[116,122],[152,158]], spikes: [], checkpoints: [70, 150] },
+    { name: 'SPIKE ALLEY', finish: 220, stars: [24, 32, 42], spawn: 2,
+      points: [[0,0],[14,0],[20,2.6],[26,2.6],[34,-1.6],[46,-1.6],[52,1.8],[60,1.8],[70,-0.8],[86,-0.8],[92,2.2],[100,2.2],[110,-1.4],[126,-1.4],[132,2.8],[140,2.8],[150,-2],[166,-2],[172,1.2],[184,1.2],[192,-0.6],[220,-0.6]],
+      gaps: [[86,92],[126,132],[166,172]], spikes: [[56,64],[76,84],[142,150],[180,190]], checkpoints: [70, 150] }
+  ];
+
+  var levelIndex = 0;
+  var state, cam, input, keys, lastTime, bestTimes, crashTimer, flash;
+
+  function loadBests() {
+    try { bestTimes = JSON.parse(localStorage.getItem('dylan-trials-best') || '{}'); } catch (e) { bestTimes = {}; }
+  }
+  function saveBests() { localStorage.setItem('dylan-trials-best', JSON.stringify(bestTimes)); }
+
+  function elev(level, x) {
+    var p = level.points;
+    if (x <= p[0][0]) return p[0][1];
+    for (var i = 0; i < p.length - 1; i++) {
+      var a = p[i], b = p[i + 1];
+      if (x >= a[0] && x <= b[0]) {
+        var t = (x - a[0]) / (b[0] - a[0]);
+        return a[1] + (b[1] - a[1]) * t;
+      }
+    }
+    return p[p.length - 1][1];
+  }
+  function inGap(level, x) {
+    for (var i = 0; i < level.gaps.length; i++) if (x > level.gaps[i][0] && x < level.gaps[i][1]) return true;
+    return false;
+  }
+  function groundY(x) {
+    if (inGap(LEVELS[levelIndex], x)) return null;
+    return elev(LEVELS[levelIndex], x);
+  }
+  function slopeAt(x) {
+    var a = groundY(x - 0.6), b = groundY(x + 0.6);
+    if (a === null || b === null) return 0;
+    return Math.atan2(b - a, 1.2);
+  }
+
+  function reset(keepTime) {
+    var lv = LEVELS[levelIndex];
+    var x = lv.spawn || 2;
+    state = {
+      x: x, y: elev(lv, x) + 0.32, v: 6, vy: 0, rot: slopeAt(x),
+      grounded: true, started: false, crashed: false, time: 0,
+      checkpoint: lv.spawn || 2, finished: false, lean: 0, leanAngle: 0
+    };
+    cam = { x: state.x - 9, y: state.y };
+    input = { jump: false };
+    keys = { gas: false, brake: false, left: false, right: false };
+    crashTimer = 0; flash = 0;
+    if (!keepTime) updateHud();
+  }
+
+  function startLevel(i) {
+    levelIndex = Math.max(0, Math.min(LEVELS.length - 1, i));
+    reset();
+    state.started = true;
+    startOverlay.classList.add('hidden');
+    finishOverlay.classList.add('hidden');
+    levelEl.textContent = String(levelIndex + 1);
+    var b = bestTimes[levelIndex];
+    bestEl.textContent = b ? b.toFixed(1) : '--';
+  }
+
+  function finish() {
+    state.finished = true;
+    state.started = false;
+    var t = state.time;
+    var lv = LEVELS[levelIndex];
+    var stars = 0;
+    if (t <= lv.stars[0]) stars = 3;
+    else if (t <= lv.stars[1]) stars = 2;
+    else if (t <= lv.stars[2]) stars = 1;
+    var prev = bestTimes[levelIndex];
+    if (!prev || t < prev) { bestTimes[levelIndex] = t; saveBests(); }
+    finishStars.innerHTML = '';
+    for (var s = 0; s < 3; s++) {
+      var el = document.createElement('span');
+      el.textContent = '★';
+      if (s >= stars) el.className = 'off';
+      finishStars.appendChild(el);
+    }
+    finishLabel.textContent = stars === 3 ? 'PERFECT RUN' : 'TRACK CLEARED';
+    finishTitle.textContent = stars === 3 ? 'CLEAN.' : (stars === 0 ? 'SURVIVED.' : 'DONE.');
+    finishTime.textContent = t.toFixed(2) + ' s  ·  best ' + bestTimes[levelIndex].toFixed(1) + ' s';
+    nextBtn.innerHTML = levelIndex < LEVELS.length - 1 ? '<span>▶</span> NEXT TRACK' : '<span>↻</span> PLAY AGAIN';
+    finishOverlay.classList.remove('hidden');
+    bestEl.textContent = bestTimes[levelIndex].toFixed(1);
+  }
+
+  function crash() {
+    if (state.crashed) return;
+    state.crashed = true;
+    crashTimer = 0.55;
+    flash = 0.25;
+    state.v *= 0.2;
+  }
+
+  function respawn() {
+    var lv = LEVELS[levelIndex];
+    var x = state.checkpoint;
+    state.x = x;
+    state.y = (groundY(x) === null ? elev(lv, x) : groundY(x)) + 0.4;
+    state.v = 4;
+    state.vy = 0;
+    state.rot = slopeAt(x);
+    state.grounded = true;
+    state.crashed = false;
+    crashTimer = 0;
+  }
+
+  function updateHud() {
+    speedEl.innerHTML = Math.round((state ? state.v : 0) * 3.6) + '<small>KM/H</small>';
+    timeEl.innerHTML = (state ? state.time.toFixed(1) : '0.0') + '<small>S</small>';
+  }
+
+  function update(dt) {
+    if (!state.started) return;
+    state.time += dt;
+    flash = Math.max(0, flash - dt);
+
+    if (state.crashed) {
+      crashTimer -= dt;
+      if (crashTimer <= 0) respawn();
+      updateHud();
+      return;
+    }
+
+    var lv = LEVELS[levelIndex];
+    var gy = groundY(state.x);
+    var slope = slopeAt(state.x);
+    var leanIn = (keys.left ? 1 : 0) - (keys.right ? 1 : 0);
+    state.lean += (leanIn - state.lean) * Math.min(1, dt * 7);
+
+    if (state.grounded) {
+      if (keys.gas) state.v += 7 * dt;
+      else state.v -= 1.4 * dt;
+      if (keys.brake) state.v -= 12 * dt;
+      state.v += Math.sin(slope) * 9 * dt;
+      state.v = Math.max(0, Math.min(21, state.v));
+      state.x += state.v * dt;
+      var gy2 = groundY(state.x);
+      if (gy2 === null) {
+        state.grounded = false;
+        state.vy = 3.2;
+      } else {
+        state.y = gy2 + 0.32;
+        state.rot += (slope + state.lean * 0.55 - state.rot) * Math.min(1, dt * 9);
+        if (input.jump) {
+          input.jump = false;
+          state.vy = 8.2;
+          state.grounded = false;
+        }
+      }
+      // spikes
+      for (var si = 0; si < lv.spikes.length; si++) {
+        var sp = lv.spikes[si];
+        if (state.x > sp[0] && state.x < sp[1]) crash();
+      }
+    } else {
+      state.vy -= 22 * dt;
+      state.x += state.v * dt;
+      state.y += state.vy * dt;
+      state.rot += state.lean * 3.6 * dt;
+      var g3 = groundY(state.x);
+      if (g3 !== null && state.y <= g3 + 0.32) {
+        var diff = Math.abs(normalizeAngle(state.rot - slopeAt(state.x)));
+        if (diff > 1.05) {
+          state.y = g3 + 0.32;
+          crash();
+        } else {
+          state.y = g3 + 0.32;
+          state.vy = 0;
+          state.grounded = true;
+          state.rot = slopeAt(state.x);
+          state.lean = 0;
+        }
+      }
+    }
+
+    if (state.y < -14) crash();
+
+    // checkpoints
+    for (var ci = 0; ci < lv.checkpoints.length; ci++) {
+      var c = lv.checkpoints[ci];
+      if (state.x > c && state.checkpoint < c) state.checkpoint = c;
+    }
+    if (state.x >= lv.finish) finish();
+
+    // camera
+    cam.x += (state.x - 9 - cam.x) * Math.min(1, dt * 5);
+    cam.y += (state.y - cam.y) * Math.min(1, dt * 4);
+
+    updateHud();
+  }
+
+  function normalizeAngle(a) {
+    while (a > Math.PI) a -= Math.PI * 2;
+    while (a < -Math.PI) a += Math.PI * 2;
+    return a;
+  }
+
+  // ---------- render ----------
+  function S() { return H / 15; }
+  function sx(x) { return (x - cam.x) * S(); }
+  function sy(y) { return H * 0.62 - (y - cam.y) * S(); }
+
+  function drawBackground() {
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#15181d'); g.addColorStop(0.6, '#101215'); g.addColorStop(1, '#0b0c0e');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    var glow = ctx.createRadialGradient(W * 0.5, H * 0.4, 30, W * 0.5, H * 0.4, W * 0.6);
+    glow.addColorStop(0, 'rgba(229,57,53,0.07)'); glow.addColorStop(1, 'rgba(229,57,53,0)');
+    ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+    for (var l = 0; l < 2; l++) {
+      var off = l ? 0.25 : 0.1, amp = l ? 40 : 70, base = l ? 0.72 : 0.6;
+      ctx.beginPath(); ctx.moveTo(0, H);
+      for (var px = 0; px <= W + 20; px += 16) {
+        var wx = cam.x * off + px / S() * 0.6;
+        var yy = H * base + Math.sin(wx / 30) * amp + Math.sin(wx / 11 + 1) * amp * 0.3 - cam.y * 2;
+        ctx.lineTo(px, yy);
+      }
+      ctx.lineTo(W, H); ctx.closePath();
+      ctx.fillStyle = l ? '#171a1e' : '#121418'; ctx.fill();
+    }
+  }
+
+  function drawGround() {
+    var lv = LEVELS[levelIndex];
+    var step = 0.25, startX = cam.x - 2, endX = cam.x + W / S() + 2;
+    var started = false;
+    ctx.beginPath();
+    for (var x = startX; x <= endX; x += step) {
+      var gy = groundY(x);
+      if (gy === null) { started = false; continue; }
+      var px = sx(x), py = sy(gy);
+      if (!started) { ctx.moveTo(px, py); started = true; } else ctx.lineTo(px, py);
+    }
+    // fill down
+    var path = new Path2D();
+    var s2 = false, firstX = null, lastX = null;
+    for (var x2 = startX; x2 <= endX; x2 += step) {
+      var g2 = groundY(x2);
+      if (g2 === null) { s2 = false; continue; }
+      var px2 = sx(x2), py2 = sy(g2);
+      if (!s2) { path.moveTo(px2, H + 60); path.lineTo(px2, py2); s2 = true; firstX = px2; }
+      else path.lineTo(px2, py2);
+      lastX = px2;
+    }
+    if (lastX !== null) { path.lineTo(lastX, H + 60); path.closePath(); }
+    ctx.fillStyle = '#20242a';
+    ctx.fill(path);
+    ctx.strokeStyle = 'rgba(244,241,236,0.9)'; ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // spikes
+    for (var si = 0; si < lv.spikes.length; si++) {
+      var sp = lv.spikes[si];
+      for (var x3 = sp[0]; x3 < sp[1]; x3 += 0.55) {
+        var g3 = groundY(x3); if (g3 === null) continue;
+        var bx = sx(x3), by = sy(g3);
+        ctx.beginPath();
+        ctx.moveTo(bx - 7, by + 2); ctx.lineTo(bx, by - 16); ctx.lineTo(bx + 7, by + 2);
+        ctx.closePath();
+        ctx.fillStyle = '#c9c4bb'; ctx.fill();
+      }
+    }
+
+    // checkpoints + finish
+    for (var ci = 0; ci < lv.checkpoints.length; ci++) {
+      var cx = lv.checkpoints[ci], cy = elev(lv, cx);
+      var px = sx(cx), py = sy(cy);
+      ctx.strokeStyle = state.checkpoint >= cx ? '#E53935' : '#6b6b6b';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, py - 46); ctx.stroke();
+      ctx.fillStyle = state.checkpoint >= cx ? '#E53935' : '#6b6b6b';
+      ctx.beginPath(); ctx.moveTo(px, py - 46); ctx.lineTo(px + 26, py - 38); ctx.lineTo(px, py - 30); ctx.closePath(); ctx.fill();
+    }
+    var fx = lv.finish, fy = elev(lv, fx);
+    ctx.strokeStyle = '#E53935'; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(sx(fx), sy(fy)); ctx.lineTo(sx(fx), sy(fy) - 120); ctx.stroke();
+    ctx.fillStyle = '#E53935';
+    ctx.fillRect(sx(fx), sy(fy) - 120, 90, 22);
+    ctx.fillStyle = '#fff'; ctx.font = '700 11px Inter, sans-serif';
+    ctx.fillText('FINISH', sx(fx) + 14, sy(fy) - 105);
+  }
+
+  function drawBike() {
+    var px = sx(state.x), py = sy(state.y);
+    var sc = S();
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(-state.rot);
+    var wr = 0.32 * sc;
+    // wheels
+    ctx.fillStyle = '#0c0c0c';
+    ctx.strokeStyle = '#2a2a2a';
+    [-0.55, 0.55].forEach(function (wx) {
+      ctx.beginPath(); ctx.arc(wx * sc, 0, wr, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.strokeStyle = '#c9c4bb'; ctx.lineWidth = 1;
+      for (var s = 0; s < 4; s++) {
+        var a = s * Math.PI / 4 + state.x * 2;
+        ctx.beginPath(); ctx.moveTo(wx * sc, 0); ctx.lineTo(wx * sc + Math.cos(a) * wr * 0.85, Math.sin(a) * wr * 0.85); ctx.stroke();
+      }
+    });
+    // frame
+    ctx.strokeStyle = '#E53935'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(-0.55 * sc, 0); ctx.lineTo(-0.05 * sc, -0.1 * sc); ctx.lineTo(0.38 * sc, 0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-0.05 * sc, -0.1 * sc); ctx.lineTo(-0.1 * sc, -0.55 * sc); ctx.lineTo(0.28 * sc, -0.55 * sc); ctx.stroke();
+    // rider
+    ctx.fillStyle = '#d7ef1f';
+    ctx.beginPath(); ctx.ellipse(-0.02 * sc, -0.78 * sc, 0.16 * sc, 0.24 * sc, -0.25, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#141414';
+    ctx.beginPath(); ctx.arc(0.02 * sc, -1.06 * sc, 0.13 * sc, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#141414'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(-0.12 * sc, -0.7 * sc); ctx.lineTo(0.3 * sc, -0.5 * sc); ctx.stroke();
+    ctx.restore();
+  }
+
+  function draw() {
+    drawBackground();
+    drawGround();
+    drawBike();
+    if (flash > 0) {
+      ctx.fillStyle = 'rgba(229,57,53,' + (flash * 1.4).toFixed(2) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+  }
+
+  var last = performance.now();
+  function frame(now) {
+    var dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('keydown', function (e) {
+    if (e.code === 'KeyW' || e.code === 'ArrowUp') { e.preventDefault(); keys.gas = true; }
+    else if (e.code === 'KeyS' || e.code === 'ArrowDown') { e.preventDefault(); keys.brake = true; }
+    else if (e.code === 'KeyA' || e.code === 'ArrowLeft') { e.preventDefault(); keys.left = true; }
+    else if (e.code === 'KeyD' || e.code === 'ArrowRight') { e.preventDefault(); keys.right = true; }
+    else if (e.code === 'Space') { e.preventDefault(); if (!state.started && !state.finished) startLevel(levelIndex); else input.jump = true; }
+    else if (e.code === 'KeyR') { startLevel(levelIndex); }
+  });
+  window.addEventListener('keyup', function (e) {
+    if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.gas = false;
+    if (e.code === 'KeyS' || e.code === 'ArrowDown') keys.brake = false;
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = false;
+    if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = false;
+  });
+  document.getElementById('startBtn').addEventListener('click', function () { startLevel(0); });
+  nextBtn.addEventListener('click', function () {
+    if (levelIndex < LEVELS.length - 1) startLevel(levelIndex + 1);
+    else startLevel(0);
+  });
+
+  loadBests();
+  reset();
+  levelEl.textContent = '1';
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

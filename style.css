@@ -959,6 +959,31 @@ html.hero-motion-ready .page-home .hero-wheel {
   color: #E53935;
 }
 
+.page-mtb .mtb-play-ground {
+  position: absolute;
+  left: 470px;
+  top: 620px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 18px;
+  border: 1px solid rgba(244, 241, 236, 0.35);
+  background: rgba(23, 23, 23, 0.55);
+  backdrop-filter: blur(6px);
+  color: #F4F1EC;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.page-mtb .mtb-play-ground:hover {
+  border-color: #E53935;
+  color: #E53935;
+}
+
 .page-mtb .mtb-play-btn:hover {
   background: #F4F1EC;
   color: #E53935;
